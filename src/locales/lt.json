@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "Apžvalga",
+    "printers": "Spausdintuvai",
+    "rooms": "Kabinetai",
+    "cartridges": "Kasečių katalogas",
+    "inventory": "Sandėlis",
+    "history": "Operacijų istorija",
+    "reports": "Ataskaitos",
+    "settings": "Nustatymai"
+  },
+  "common": {
+    "search": "Ieškoti",
+    "save": "Išsaugoti",
+    "cancel": "Atšaukti",
+    "loading": "Įkeliama…",
+    "error": "Nepavyko įkelti duomenų. Bandykite dar kartą.",
+    "empty": "Duomenų dar nėra",
+    "language": "Sąsajos kalba",
+    "required": "Šis laukas privalomas",
+    "unavailable": "Serveris dar neprijungtas. Duomenys nerodomi.",
+    "prototype": "Sąsajos pagrindas · serveris neprijungtas"
+  },
+  "dashboard": {
+    "title": "Spausdinimo ūkio apžvalga",
+    "subtitle": "Spausdintuvai, kasetės ir atsargos vienoje vietoje.",
+    "total": "Iš viso spausdintuvų",
+    "active": "Aktyvūs spausdintuvai",
+    "stock": "Kasečių likutis sandėlyje",
+    "types": "Kasečių rūšys",
+    "low": "Mažas likutis",
+    "issued": "Šio mėnesio išdavimai",
+    "consumption": "Kasečių sunaudojimas",
+    "recent": "Naujausios operacijos"
+  },
+  "form": {
+    "room": "Kabineto pavadinimas",
+    "notes": "Pastabos",
+    "title": "Lokalizavimo peržiūra",
+    "description": "Įvesti duomenys išlieka nepakitę keičiant kalbą. Ši forma tikrina vertimus ir nesaugo inventoriaus duomenų.",
+    "success": "Forma patikrinta. Duomenys į serverį neišsiųsti."
+  },
+  "reports": {
+    "title": "Ataskaitos",
+    "from": "Nuo",
+    "to": "Iki",
+    "department": "Skyrius",
+    "export": "Eksportuoti CSV",
+    "empty": "Ataskaitoms reikalingas prijungtas serveris."
+  },
+  "settings": {
+    "title": "Nustatymai",
+    "preference": "Kalbos pasirinkimas išsaugomas šioje naršyklėje.",
+    "date": "Datos formatas",
+    "number": "Skaičiaus formatas"
+  },
+  "errors": {
+    "INVALID_INPUT": "Patikrinkite įvestus duomenis.",
+    "UNAUTHORIZED": "Prisijunkite, kad galėtumėte tęsti.",
+    "FORBIDDEN": "Neturite teisės atlikti šio veiksmo.",
+    "INSUFFICIENT_STOCK": "Nepakanka kasečių sandėlyje.",
+    "UNVERIFIED_COMPATIBILITY": "Kasetės suderinamumas nepatvirtintas.",
+    "UNKNOWN": "Įvyko netikėta klaida."
+  }
+}

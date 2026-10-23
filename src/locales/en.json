@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "dashboard": "Overview",
+    "printers": "Printers",
+    "rooms": "Rooms",
+    "cartridges": "Cartridge catalog",
+    "inventory": "Inventory",
+    "history": "Transaction history",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "common": {
+    "search": "Search",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "error": "Unable to load data. Please try again.",
+    "empty": "No data yet",
+    "language": "Interface language",
+    "required": "This field is required",
+    "unavailable": "The backend is not connected yet. No data is displayed.",
+    "prototype": "Interface foundation · backend not connected"
+  },
+  "dashboard": {
+    "title": "Printing overview",
+    "subtitle": "Printers, cartridges and inventory in one place.",
+    "total": "Total printers",
+    "active": "Active printers",
+    "stock": "Cartridges in stock",
+    "types": "Cartridge types",
+    "low": "Low stock",
+    "issued": "Issued this month",
+    "consumption": "Cartridge consumption",
+    "recent": "Recent transactions"
+  },
+  "form": {
+    "room": "Room name",
+    "notes": "Notes",
+    "title": "Localization preview",
+    "description": "Entered data stays unchanged when switching languages. This form validates translations and does not save inventory data.",
+    "success": "Form validated. No data was sent to the server."
+  },
+  "reports": {
+    "title": "Reports",
+    "from": "From",
+    "to": "To",
+    "department": "Department",
+    "export": "Export CSV",
+    "empty": "Reports require a connected backend."
+  },
+  "settings": {
+    "title": "Settings",
+    "preference": "Your language preference is saved in this browser.",
+    "date": "Date format",
+    "number": "Number format"
+  },
+  "errors": {
+    "INVALID_INPUT": "Check the entered information.",
+    "UNAUTHORIZED": "Sign in to continue.",
+    "FORBIDDEN": "You do not have permission to perform this action.",
+    "INSUFFICIENT_STOCK": "Insufficient cartridge stock.",
+    "UNVERIFIED_COMPATIBILITY": "Cartridge compatibility has not been verified.",
+    "UNKNOWN": "An unexpected error occurred."
+  }
+}
