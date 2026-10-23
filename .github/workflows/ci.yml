@@ -1,0 +1,54 @@
+name: PrintTrack checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: local-test-only
+          POSTGRES_DB: printtrack_test
+        ports: ['55432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d printtrack_test"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:local-test-only@localhost:55432/printtrack_test
+      ADMIN_PASSWORD: local-test-only-password
+      DEMO_MODE: 'true'
+      COOKIE_SECURE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: npm run lint && npm run typecheck && npm test && npm run build
+      - run: pip install -r backend/requirements.txt
+      - run: ruff check backend deploy
+      - run: alembic upgrade head && python -m pytest -q tests
+        working-directory: backend
+      - run: python deploy/init_demo_env.py --demo
+      - name: Start isolated DEMO stack
+        run: |
+          set -a
+          source .env
+          set +a
+          docker compose up --build -d --wait --wait-timeout 180
+      - run: npx playwright install --with-deps chromium
+      - name: Browser workflow against a separate DEMO database
+        run: |
+          set -a
+          source .env
+          set +a
+          PRINTTRACK_E2E_PASSWORD="$ADMIN_PASSWORD" npm run test:e2e
+      - if: always()
+        run: docker compose down --volumes

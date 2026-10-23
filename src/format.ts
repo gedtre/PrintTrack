@@ -6,5 +6,11 @@ export function useLocaleFormat() {
     number: (value: number) => new Intl.NumberFormat(locale).format(value),
     date: (value: Date) =>
       new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(value),
+    dateTime: (value: Date) =>
+      new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "Europe/Vilnius",
+      }).format(value),
   };
 }

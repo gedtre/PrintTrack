@@ -1,5 +1,12 @@
-import { useState } from "react";
+import { Button } from "./components/ui/button";
+import { useEffect, useState } from "react";
 import { NavLink, Route, Routes } from "react-router-dom";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   Printer,
@@ -10,147 +17,180 @@ import {
   DoorOpen,
   History,
   Package,
+  Building,
+  Layers,
 } from "lucide-react";
-import { useLocaleFormat } from "./format";
+import { api, ApiError, useWrite, type User } from "./api";
+import { ErrorMessage, Loading } from "./components/Shared";
+import { ResourcePage, CompatibilityPage } from "./components/Catalog";
+import { InventoryPage } from "./components/Inventory";
+import { ReportsPage } from "./components/Reports";
+import { Dashboard } from "./components/Dashboard";
+import { SettingsPage } from "./components/Settings";
+export function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, refetchOnWindowFocus: true, staleTime: 10000 },
+      mutations: { retry: false },
+    },
+  });
+}
 const sections = [
   "dashboard",
   "printers",
   "rooms",
+  "departments",
+  "buildings",
+  "models",
   "cartridges",
   "inventory",
   "history",
   "reports",
   "settings",
-] as const;
+];
 const icons = [
   LayoutDashboard,
   Printer,
   DoorOpen,
+  Building,
+  Building,
+  Layers,
   Package,
   Boxes,
   History,
   FileText,
   Settings,
 ];
-function PreviewForm() {
-  const { t } = useTranslation();
-  const [room, setRoom] = useState("");
-  const [notes, setNotes] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [success, setSuccess] = useState(false);
-  return (
-    <section className="card">
-      <h2>{t("form.title")}</h2>
-      <p>{t("form.description")}</p>
-      <form
-        noValidate
-        onSubmit={(e) => {
-          e.preventDefault();
-          setSubmitted(true);
-          setSuccess(!!room.trim());
-        }}
-      >
-        <label htmlFor="room">{t("form.room")}</label>
-        <input
-          id="room"
-          value={room}
-          aria-required="true"
-          aria-invalid={submitted && !room.trim()}
-          aria-describedby={
-            submitted && !room.trim() ? "room-error" : undefined
-          }
-          onChange={(e) => {
-            setRoom(e.target.value);
-            setSuccess(false);
-          }}
-        />
-        {submitted && !room.trim() && (
-          <p id="room-error" role="alert" className="error">
-            {t("common.required")}
-          </p>
-        )}
-        <label htmlFor="notes">{t("form.notes")}</label>
-        <textarea
-          id="notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
-        <button className="primary" type="submit">
-          {t("common.save")}
-        </button>
-        {success && <p role="status">{t("form.success")}</p>}
-      </form>
-    </section>
-  );
-}
-function Dashboard() {
-  const { t } = useTranslation();
-  return (
-    <>
-      <h1>{t("dashboard.title")}</h1>
-      <p>{t("dashboard.subtitle")}</p>
-      <div className="metrics">
-        {["total", "active", "stock", "types", "low", "issued"].map((key) => (
-          <section className="card" key={key}>
-            <p>{t(`dashboard.${key}`)}</p>
-            <strong aria-label={t("common.unavailable")}>—</strong>
-          </section>
-        ))}
-      </div>
-      <div className="columns">
-        {["consumption", "recent"].map((key) => (
-          <section className="card" key={key}>
-            <h2>{t(`dashboard.${key}`)}</h2>
-            <p className="empty">{t("common.unavailable")}</p>
-          </section>
-        ))}
-      </div>
-    </>
-  );
-}
-function SettingsPage() {
-  const { t } = useTranslation();
-  const f = useLocaleFormat();
-  return (
-    <>
-      <h1>{t("settings.title")}</h1>
-      <section className="card">
-        <p>{t("settings.preference")}</p>
-        <dl>
-          <dt>{t("settings.date")}</dt>
-          <dd>{f.date(new Date(2026, 9, 23))}</dd>
-          <dt>{t("settings.number")}</dt>
-          <dd>{f.number(12345.67)}</dd>
-        </dl>
-      </section>
-      <PreviewForm />
-    </>
-  );
-}
-function Reports() {
-  const { t } = useTranslation();
-  return (
-    <>
-      <h1>{t("reports.title")}</h1>
-      <section className="card">
-        <div className="columns">
-          <label>
-            {t("reports.from")}
-            <input type="date" />
-          </label>
-          <label>
-            {t("reports.to")}
-            <input type="date" />
-          </label>
-        </div>
-        <p>{t("reports.empty")}</p>
-        <button disabled>{t("reports.export")}</button>
-      </section>
-    </>
-  );
-}
-export default function App() {
+function LanguageSwitcher({ user }: { user?: User }) {
   const { t, i18n } = useTranslation();
+  const client = useQueryClient();
+  const write = useWrite();
+  return (
+    <div>
+      <div className="language" role="group" aria-label={t("common.language")}>
+        {(["lt", "en"] as const).map((lang) => (
+          <button
+            key={lang}
+            lang={lang}
+            disabled={write.isPending}
+            aria-pressed={i18n.resolvedLanguage === lang}
+            onClick={() => {
+              if (user) {
+                write.mutate(
+                  {
+                    path: "/auth/language",
+                    method: "PATCH",
+                    body: { language: lang },
+                  },
+                  {
+                    onSuccess: (updated) => {
+                      client.setQueryData(["me"], updated);
+                      void i18n.changeLanguage(lang);
+                    },
+                  },
+                );
+              } else void i18n.changeLanguage(lang);
+            }}
+          >
+            {lang.toUpperCase()}
+          </button>
+        ))}
+      </div>
+      <ErrorMessage error={write.error} />
+    </div>
+  );
+}
+function LoginPage() {
+  const { t } = useTranslation();
+  const client = useQueryClient();
+  const write = useWrite();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  return (
+    <div className="login-layout">
+      <section className="card login">
+        <div className="page-heading">
+          <h1>
+            <Printer /> PrintTrack
+          </h1>
+          <LanguageSwitcher />
+        </div>
+        <h2>{t("app.login")}</h2>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            write.mutate(
+              { path: "/auth/login", body: { username, password } },
+              {
+                onSuccess: (user) => {
+                  client.clear();
+                  client.setQueryData(["me"], user);
+                },
+              },
+            );
+          }}
+        >
+          <label>
+            {t("fields.username")}
+            <input
+              autoComplete="username"
+              required
+              maxLength={80}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </label>
+          <label>
+            {t("fields.password")}
+            <input
+              type="password"
+              autoComplete="current-password"
+              required
+              maxLength={200}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+          <ErrorMessage error={write.error} />
+          <Button type="submit" disabled={write.isPending}>
+            {t("app.login")}
+          </Button>
+        </form>
+        <p>{t("app.loginHelp")}</p>
+      </section>
+    </div>
+  );
+}
+function Application() {
+  const { t, i18n } = useTranslation();
+  const client = useQueryClient();
+  const write = useWrite();
+  const [search, setSearch] = useState("");
+  const profile = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api<User>("/auth/me"),
+    refetchInterval: 60000,
+  });
+  const health = useQuery({
+    queryKey: ["health"],
+    queryFn: () => api<{ demo: boolean }>("/health"),
+  });
+  const user = profile.data;
+  useEffect(() => {
+    if (user) void i18n.changeLanguage(user.language);
+  }, [user?.id, user?.language, i18n, user]);
+  if (profile.isLoading) return <Loading />;
+  if (profile.error instanceof ApiError && profile.error.status === 401)
+    return <LoginPage />;
+  if (profile.error)
+    return (
+      <>
+        <ErrorMessage error={profile.error} />
+        <button onClick={() => void profile.refetch()}>{t("app.retry")}</button>
+      </>
+    );
+  if (!user) return <LoginPage />;
+  const canEdit = user.role !== "viewer";
   return (
     <div className="app">
       <aside>
@@ -171,52 +211,126 @@ export default function App() {
       </aside>
       <div className="workspace">
         <header>
-          <span className="badge">{t("common.prototype")}</span>
-          <div
-            className="language"
-            role="group"
-            aria-label={t("common.language")}
-          >
-            {(["lt", "en"] as const).map((lang) => (
-              <button
-                key={lang}
-                lang={lang}
-                aria-pressed={i18n.resolvedLanguage === lang}
-                onClick={() => void i18n.changeLanguage(lang)}
-              >
-                {lang.toUpperCase()}
-              </button>
-            ))}
+          <div>
+            <span className="badge">
+              {health.data?.demo ? t("app.demo") : t("app.production")}
+            </span>
+            <input
+              className="global-search"
+              aria-label={t("app.globalSearch")}
+              placeholder={t("app.globalSearch")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="row-actions">
+            <span>{user.username}</span>
+            <LanguageSwitcher user={user} />
+            <button
+              disabled={write.isPending}
+              onClick={() =>
+                write.mutate(
+                  { path: "/auth/logout", method: "POST" },
+                  {
+                    onSuccess: () => {
+                      client.clear();
+                      client.setQueryData(["me"], null);
+                    },
+                  },
+                )
+              }
+            >
+              {t("app.logout")}
+            </button>
           </div>
         </header>
         <main>
+          <ErrorMessage error={write.error} />
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/reports" element={<Reports />} />
-            {sections
-              .filter((s) => !["dashboard", "settings", "reports"].includes(s))
-              .map((section) => (
+            {["printers", "rooms", "departments", "buildings", "models"].map(
+              (resource) => (
                 <Route
-                  key={section}
-                  path={`/${section}`}
+                  key={resource}
+                  path={`/${resource}`}
                   element={
-                    <>
-                      <h1>{t(`nav.${section}`)}</h1>
-                      <section className="card empty">
-                        {t("common.unavailable")}
-                      </section>
-                    </>
+                    <ResourcePage
+                      key={resource}
+                      resource={resource}
+                      canEdit={canEdit}
+                      search={search}
+                    />
                   }
                 />
-              ))}
+              ),
+            )}
+            <Route
+              path="/cartridges"
+              element={
+                <>
+                  <ResourcePage
+                    resource="cartridges"
+                    canEdit={canEdit}
+                    search={search}
+                  />
+                  <CompatibilityPage canEdit={canEdit} />
+                </>
+              }
+            />
+            <Route
+              path="/inventory"
+              element={<InventoryPage canEdit={canEdit} />}
+            />
+            <Route
+              path="/history"
+              element={<ReportsPage key="history" history canEdit={canEdit} />}
+            />
+            <Route
+              path="/reports"
+              element={<ReportsPage key="reports" canEdit={canEdit} />}
+            />
+            <Route path="/settings" element={<SettingsPage user={user} />} />
             <Route
               path="*"
-              element={<p role="alert">{t("errors.UNKNOWN")}</p>}
+              element={<p role="alert">{t("errors.NOT_FOUND")}</p>}
             />
           </Routes>
         </main>
       </div>
     </div>
+  );
+}
+export default function App() {
+  const [client] = useState(createQueryClient);
+  const { t, i18n } = useTranslation();
+  useEffect(() => {
+    document
+      .querySelectorAll<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >("input, select, textarea")
+      .forEach((element) => element.setCustomValidity(""));
+  }, [i18n.resolvedLanguage]);
+  return (
+    <QueryClientProvider client={client}>
+      <div
+        onInvalid={(event) => {
+          const element = event.target as HTMLInputElement;
+          if (element.setCustomValidity)
+            element.setCustomValidity(
+              t(
+                element.validity.valueMissing
+                  ? "common.required"
+                  : "errors.INVALID_INPUT",
+              ),
+            );
+        }}
+        onInput={(event) => {
+          const element = event.target as HTMLInputElement;
+          if (element.setCustomValidity) element.setCustomValidity("");
+        }}
+      >
+        <Application />
+      </div>
+    </QueryClientProvider>
   );
 }

@@ -19,15 +19,13 @@ export function persistLanguage(language: string) {
     /* Private browsing can disable storage. */
   }
 }
-void i18n
-  .use(initReactI18next)
-  .init({
-    resources: { lt: { translation: lt }, en: { translation: en } },
-    lng: savedLanguage(),
-    fallbackLng: "lt",
-    supportedLngs: ["lt", "en"],
-    interpolation: { escapeValue: false },
-  });
+void i18n.use(initReactI18next).init({
+  resources: { lt: { translation: lt }, en: { translation: en } },
+  lng: savedLanguage(),
+  fallbackLng: "lt",
+  supportedLngs: ["lt", "en"],
+  interpolation: { escapeValue: false },
+});
 document.documentElement.lang = i18n.language;
 i18n.on("languageChanged", persistLanguage);
 export default i18n;
