@@ -1,0 +1,13 @@
+PrintTrack Desktop uses:
+Python 3.12 — Python Software Foundation License https://docs.python.org/3/license.html
+PySide6 / Qt 6.8.3 — LGPLv3 / GPLv3 or commercial license https://doc.qt.io/qtforpython-6/licenses.html
+Qt source: https://download.qt.io/archive/qt/6.8/6.8.3/
+PySide source: https://code.qt.io/cgit/pyside/pyside-setup.git/tag/?h=v6.8.3
+portalocker 3.2.0 — BSD-3-Clause https://github.com/wolph/portalocker
+PyInstaller — GPLv2 with bootloader exception https://pyinstaller.org/en/stable/license.html
+
+The application dynamically loads the unmodified Qt libraries bundled by PyInstaller.
+Corresponding library license files are collected from the PySide6 distribution.
+For replacing Qt libraries with compatible modified versions, use the included
+source project and build workflow; remove --onefile to make an unpacked distribution.
+Application source and build scripts are available in the PrintTrack repository.
