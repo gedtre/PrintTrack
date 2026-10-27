@@ -1,0 +1,53 @@
+PRINTTRACK DESKTOP 1.0 — NAUDOJIMAS
+
+1. Išskleiskite visą PrintTrack-Windows-x64.zip failą.
+2. Atverkite aplanką PrintTrack ir dukart spustelėkite PrintTrack.exe.
+3. Python ar kitų programavimo priemonių diegti nereikia.
+
+Reikalavimai: Windows 10 / 11, 64 bitų. Programa veikia be interneto.
+Pirmasis paleidimas gali trukti kelias sekundes, kol išpakuojamos Qt bibliotekos.
+Programa neturi įsigyto skaitmeninio parašo; Windows gali rodyti nežinomo leidėjo pranešimą.
+
+PRADŽIA
+Tikras inventorius pradžioje tuščias. Pateiktas 16 kasečių katalogas yra NEPATIKRINTAS:
+likučiai 0, suderinamumo patvirtinimų nėra.
+1. „Kabinetai“: sukurkite skyrius ir kabinetus.
+2. „Spausdintuvai“: užregistruokite įrenginius ir priskirkite kabinetams.
+3. „Kasetės“: patikslinkite tipą, lusto reikalavimus ir minimalų likutį.
+4. „Suderinamumas“: pridėkite tik patikrintus ryšius. Įrašykite šaltinį ir atsakingą asmenį.
+5. „Sandėlis“: užregistruokite gautas kasetes.
+6. „Kasečių išdavimas“: pasirinkite įrenginį, patvirtintą kasetę ir kiekį.
+
+Panašūs kasečių kodai nereiškia suderinamumo.
+Pakeitus spausdintuvo modelį arba kasetės kodą, tipą ar lustą,
+susijusius suderinamumo ryšius reikia patvirtinti iš naujo.
+Istorijos įrašai netrinami. Klaidas taisykite pagrįstu likučio koregavimu.
+
+DUOMENYS IR KOPIJOS
+Duomenys: %LOCALAPPDATA%\PrintTrack\data\inventory.json
+Automatinės kopijos: %LOCALAPPDATA%\PrintTrack\data\backups\
+Nustatymuose galite išsaugoti kopiją į kitą diską arba ją atkurti.
+Įprastas atkūrimas išlaiko visą istoriją, sujungia korteles ir atkuria kopijos
+likučius naujomis koregavimo operacijomis. Vėliau sukurtos kortelės lieka.
+Pažeidus duomenų failą, paleidimo langas pasiūlys atkurti kopiją;
+pažeisti originalai išsaugomi su plėtiniu .damaged-… ir gali būti nagrinėjami atskirai.
+Žurnalas apsaugo nuo nutrūkusio įrašymo. Programa nėra apsauga nuo rankinio JSON pakeitimo.
+Nenaudokite tinklo disko ar sinchronizuojamo aplanko gyvai saugyklai.
+
+CSV
+„Nustatymai“ → pasirinkite lentelę → „Eksportuoti / gauti šabloną“.
+Redaguokite UTF-8 CSV, išlaikydami antraštes, tada importuokite.
+Esamas ID atnaujina įrašą; tuščias ID sukuria naują.
+Suderinamumą patvirtinkite programoje. Operacijų CSV importas negalimas.
+Formulių pradžios simboliai eksporte apsaugomi apostrofu.
+
+DEMO
+Nustatymuose pasirinkite „Atverti DEMO langą“.
+Mokomieji duomenys saugomi %LOCALAPPDATA%\PrintTrack\demo\ ir nekeičia tikrų likučių.
+
+ATASKAITOS
+Filtruokite pagal mėnesį, skyrių, kabinetą, spausdintuvą ir kasetę.
+Ataskaitos naudoja išdavimo metu užfiksuotus pavadinimus.
+Mėnesių ribos skaičiuojamos UTC; operacijų datos rodomos vietos laiku.
+
+Programa skirta vietinei inventoriaus apskaitai. Pacientų duomenų neįveskite.

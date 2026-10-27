@@ -1,0 +1,88 @@
+name: Build PrintTrack Windows
+on:
+  push:
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/build-windows.yml'
+    tags:
+      - 'v*'
+  pull_request:
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/build-windows.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: desktop/requirements-dev.txt
+      - name: Install dependencies
+        run: python -m pip install -r desktop/requirements-dev.txt
+      - name: Automated inventory and Qt tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m pytest desktop/tests -q --junitxml=test-results.xml
+      - name: Create bundled icons
+        run: python desktop/make_assets.py
+      - name: Build standalone Windows executable
+        working-directory: desktop
+        run: >-
+          python -m PyInstaller --noconfirm --clean --onefile --windowed
+          --name PrintTrack --icon printtrack/assets/icon.ico
+          --add-data "printtrack/assets;printtrack/assets"
+          --collect-data PySide6 --exclude-module PySide6.QtWebEngineCore
+          --exclude-module PySide6.QtWebEngineWidgets main.py
+      - name: Windows executable startup and all-screen smoke test
+        shell: pwsh
+        run: |
+          $exe = Join-Path $PWD 'desktop/dist/PrintTrack.exe'
+          if (!(Test-Path $exe)) { throw 'PrintTrack.exe is missing' }
+          $data = Join-Path $env:RUNNER_TEMP 'printtrack-smoke'
+          $process = Start-Process -FilePath $exe -ArgumentList @('--smoke-test', '--data-dir', $data) -PassThru
+          if (!$process.WaitForExit(90000)) { $process.Kill(); throw 'EXE startup timed out' }
+          if ($process.ExitCode -ne 0) { throw "EXE smoke test failed: $($process.ExitCode)" }
+          if (!(Test-Path "$data/inventory.json")) { throw 'Persistent data was not created' }
+          # Relaunch checks that a second startup reads the saved JSON successfully.
+          $second = Start-Process -FilePath $exe -ArgumentList @('--smoke-test', '--data-dir', $data) -PassThru
+          if (!$second.WaitForExit(90000)) { $second.Kill(); throw 'EXE relaunch timed out' }
+          if ($second.ExitCode -ne 0) { throw "EXE relaunch failed: $($second.ExitCode)" }
+      - name: Package end-user download
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force release/PrintTrack | Out-Null
+          Copy-Item desktop/dist/PrintTrack.exe release/PrintTrack/
+          Copy-Item desktop/NAUDOJIMAS.txt release/PrintTrack/
+          Copy-Item desktop/THIRD-PARTY.txt release/PrintTrack/
+          Compress-Archive -Path release/PrintTrack -DestinationPath release/PrintTrack-Windows-x64.zip
+          $hash = (Get-FileHash release/PrintTrack-Windows-x64.zip -Algorithm SHA256).Hash
+          "$hash  PrintTrack-Windows-x64.zip" | Set-Content release/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PrintTrack-Windows-x64
+          path: |
+            release/PrintTrack-Windows-x64.zip
+            release/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Windows-test-results
+          path: test-results.xml
+      - name: Publish tagged GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          gh release create $env:GITHUB_REF_NAME release/PrintTrack-Windows-x64.zip release/SHA256SUMS.txt --title "PrintTrack Desktop $env:GITHUB_REF_NAME" --notes-file desktop/RELEASE.md
