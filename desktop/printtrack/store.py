@@ -302,10 +302,12 @@ class Store:
             raise ValidationError('Netinkama atsarginė kopija.') from e
         def operation(s):
             # Preserve every recorded movement; restore desired balances using new adjustments.
-            for kind in SCHEMAS:
+            for kind in ['rooms', 'printers', 'cartridges']:
                 existing = {r['id']: r for r in s[kind]}
                 existing.update({r['id']: copy.deepcopy(r) for r in saved[kind]})
                 s[kind] = list(existing.values())
+            # Only restore approvals whose evidence belongs to the restored entity identities.
+            s['compatibility'] = copy.deepcopy(saved['compatibility'])
             for c in s['cartridges']:
                 difference = stock(saved, c['id']) - stock(s, c['id'])
                 if difference:
@@ -352,7 +354,7 @@ class Store:
     def export_csv(self, kind, path):
         s = self.read()
         rows = s[kind]
-        fields = ['id'] + SCHEMAS[kind] if kind in SCHEMAS else ['id', 'at', 'kind', 'cartridge_id', 'code', 'quantity', 'printer_id', 'printer', 'department', 'room', 'evidence', 'note']
+        fields = ['id'] + SCHEMAS[kind] + (['verified_at'] if kind == 'compatibility' else []) if kind in SCHEMAS else ['id', 'at', 'kind', 'cartridge_id', 'code', 'quantity', 'printer_id', 'printer', 'department', 'room', 'evidence', 'note']
         write_csv(path, fields, rows)
 
 

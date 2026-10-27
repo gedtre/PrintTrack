@@ -178,3 +178,17 @@ def test_demo_is_separate(tmp_path):
     assert demo.read()['demo'] is True
     assert kpis(demo.read())['stock'] == 10
     assert real.read()['printers'] == []
+
+
+def test_restore_approvals_match_saved_identity(setup, tmp_path):
+    s, _, p, c = setup
+    verify(s, p, c)
+    saved = tmp_path / 'saved.json'
+    s.backup(saved)
+    item = s.read()['printers'][0]
+    s.save('printers', dict(item, model='Kitas modelis'), p)
+    verify(s, p, c)
+    s.restore(saved)
+    assert s.read()['printers'][0]['model'] == 'HP 1020'
+    assert len(s.read()['compatibility']) == 1
+    assert s.read()['compatibility'] == json.loads(saved.read_text('utf-8'))['compatibility']
