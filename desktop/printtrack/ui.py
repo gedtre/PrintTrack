@@ -5,13 +5,14 @@ import html
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer, QSize
+from PySide6.QtCore import Qt, QTimer, QSize, QEvent
+from shiboken6 import isValid
 from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap, QPen
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComboBox,
     QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QFrame, QGridLayout,
     QHBoxLayout, QHeaderView, QLabel, QLineEdit, QListWidget, QListWidgetItem,
     QMainWindow, QMessageBox, QPushButton, QScrollArea, QSpinBox, QStackedWidget,
-    QTableWidget, QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget)
+    QTableWidget, QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget, QStyledItemDelegate)
 
 from .store import SCHEMAS, Store, ValidationError, demo_store, kpis, stock, usage, write_csv
 from .images import photo_png
@@ -104,7 +105,8 @@ class PhotoLabel(QLabel):
     def setText(self, text):
         if hasattr(self, 'original'):
             self.original = QPixmap()
-            self.popup.hide()
+            if isValid(self.popup):
+                self.popup.hide()
         super().setText(text)
 
     def resizeEvent(self, event):
@@ -113,7 +115,7 @@ class PhotoLabel(QLabel):
         super().resizeEvent(event)
 
     def enterEvent(self, event):
-        if not self.original.isNull():
+        if not self.original.isNull() and isValid(self.popup):
             pix = self.original.scaled(520, 520, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.popup.setPixmap(pix)
             self.popup.adjustSize()
@@ -127,12 +129,49 @@ class PhotoLabel(QLabel):
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        self.popup.hide()
+        if isValid(self.popup):
+            self.popup.hide()
         super().leaveEvent(event)
 
     def hideEvent(self, event):
-        self.popup.hide()
+        if isValid(self.popup):
+            self.popup.hide()
         super().hideEvent(event)
+
+
+class PhotoDelegate(QStyledItemDelegate):
+    """Paint table thumbnails as icons; avoid child-widget destruction on refresh."""
+    def __init__(self, table):
+        super().__init__(table)
+        self.table = table
+        self.popup = QLabel(table.window(), Qt.ToolTip)
+        self.popup.setAttribute(Qt.WA_ShowWithoutActivating)
+        self.popup.setStyleSheet('background: white; border: 1px solid #94a3b8; padding: 8px;')
+        table.setMouseTracking(True)
+        table.viewport().installEventFilter(self)
+        popup = self.popup
+        table.destroyed.connect(lambda: popup.deleteLater() if isValid(popup) else None)
+
+    def eventFilter(self, watched, event):
+        if event.type() in (QEvent.Leave, QEvent.Hide, QEvent.MouseButtonPress):
+            if isValid(self.popup):
+                self.popup.hide()
+        elif event.type() == QEvent.MouseMove:
+            index = self.table.indexAt(event.position().toPoint())
+            icon = index.data(Qt.DecorationRole) if index.isValid() and index.column() == 0 else None
+            if isinstance(icon, QIcon) and not icon.isNull():
+                pix = icon.pixmap(520, 520)
+                self.popup.setPixmap(pix)
+                self.popup.adjustSize()
+                point = self.table.viewport().mapToGlobal(event.position().toPoint())
+                screen = self.table.screen().availableGeometry()
+                point.setX(max(screen.left(), min(point.x() + 18, screen.right() - self.popup.width())))
+                point.setY(max(screen.top(), min(point.y() + 18, screen.bottom() - self.popup.height())))
+                self.popup.move(point)
+                self.popup.show()
+            else:
+                self.popup.hide()
+        return super().eventFilter(watched, event)
 
 
 class ImageField(QWidget):
@@ -152,7 +191,7 @@ class ImageField(QWidget):
 
 
 class RecordDialog(QDialog):
-    def __init__(self, parent, kind, state, existing=None):
+    def __init__(self, parent, kind, state, existing=None, image_loader=None):
         super().__init__(parent)
         self.kind, self.fields = kind, {}
         self.setWindowTitle('Redaguoti įrašą' if existing else 'Naujas įrašas')
@@ -198,8 +237,8 @@ class RecordDialog(QDialog):
                 if val:
                     pix = QPixmap()
                     try:
-                        pix.loadFromData(base64.b64decode(val))
-                    except ValueError:
+                        pix.loadFromData(image_loader(val) if image_loader else base64.b64decode(val))
+                    except (ValueError, OSError):
                         pass
                     if not pix.isNull():
                         preview.setPixmap(pix)
@@ -456,16 +495,12 @@ class Window(QMainWindow):
                 if field == 'image':
                     pix = QPixmap()
                     try:
-                        pix.loadFromData(base64.b64decode(val, validate=True))
-                    except (ValueError, TypeError):
+                        pix.loadFromData(self.store.image_bytes(val))
+                    except (ValueError, TypeError, OSError):
                         pass
                     item.setText('Nėra' if pix.isNull() else '')
                     if not pix.isNull():
                         item.setIcon(QIcon(pix))
-                        photo = PhotoLabel()
-                        photo.setMinimumSize(85, 65)
-                        photo.setPixmap(pix)
-                        table.setCellWidget(n, j, photo)
                 item.setData(Qt.UserRole, row.get('id', ''))
                 if isinstance(val, (int, float)):
                     item.setData(Qt.UserRole + 1, val)
@@ -477,6 +512,7 @@ class Window(QMainWindow):
             table.setRowHeight(n, 72 if 'image' in fields else 46)
         if 'image' in fields:
             table.setIconSize(QSize(90, 60))
+            table.setItemDelegateForColumn(0, PhotoDelegate(table))
         table.resizeColumnsToContents()
         for j in range(len(fields)):
             table.setColumnWidth(j, min(280, max(110, table.columnWidth(j))))
@@ -531,12 +567,15 @@ class Window(QMainWindow):
         self.layout.addWidget(self.make_table(['at', 'kind', 'code', 'quantity', 'printer'], list(reversed(self.state['movements'][-5:])), 180))
 
     def selected_id(self, table):
+        if not isValid(table):
+            return None
         row = table.currentRow()
-        return table.item(row, 0).data(Qt.UserRole) if row >= 0 else None
+        item = table.item(row, 0) if row >= 0 else None
+        return item.data(Qt.UserRole) if item is not None else None
 
     def edit_record(self, kind, row_id=None):
         existing = next((r for r in self.state[kind] if r['id'] == row_id), None)
-        dialog = RecordDialog(self, kind, self.state, existing)
+        dialog = RecordDialog(self, kind, self.state, existing, image_loader=self.store.image_bytes)
         # Keep form open when validation fails so entered data is not lost.
         while dialog.exec() == QDialog.Accepted:
             try:
@@ -586,8 +625,8 @@ class Window(QMainWindow):
                 source_label.setText('Nuotraukos šaltinis: ' + r['image_source'] if r.get('image_source') else '')
                 pix = QPixmap()
                 try:
-                    pix.loadFromData(base64.b64decode(r.get('image', '')))
-                except ValueError:
+                    pix.loadFromData(self.store.image_bytes(r.get('image', '')))
+                except (ValueError, OSError):
                     pass
                 if pix.isNull():
                     preview.clear()

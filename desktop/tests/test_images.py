@@ -39,10 +39,11 @@ def test_large_photo_survives_upload_edit_save_and_restart(qtbot, tmp_path, monk
     store.save('printers', dialog.values(), printer_id)
     reopened = Store(store.directory)
     saved = reopened.read()['printers'][0]
-    assert saved['image'] == encoded
+    assert saved['image'].startswith('images/')
+    assert reopened.image_bytes(saved['image']) == base64.b64decode(encoded)
     edited = RecordDialog(None, 'printers', reopened.read(), saved)
     qtbot.addWidget(edited)
-    assert edited.values()['image'] == encoded
+    assert edited.values()['image'] == saved['image']
     window.nav.setCurrentRow(1)
     table = window.page_area.widget().findChild(QTableWidget)
     assert not table.item(0, 0).icon().isNull()

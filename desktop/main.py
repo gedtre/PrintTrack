@@ -93,8 +93,35 @@ def main():
                     photo = Path(temporary) / 'transparent-printer.png'
                     Image.new('RGBA', (960, 960), (40, 50, 60, 128)).save(photo)
                     pix = QPixmap()
-                    assert pix.loadFromData(isolated_photo(photo), 'PNG')
+                    content = isolated_photo(photo)
+                    assert pix.loadFromData(content, 'PNG')
                     assert pix.width() == 640 and pix.height() == 640
+                    # Exercise the real modal Save -> table rebuild path in the EXE.
+                    from printtrack.ui import PhotoLabel
+                    trial_store = Store(Path(temporary) / 'inventory', initial_catalogue=False)
+                    trial_id = trial_store.save('printers', dict(name='Photo test', model='HP',
+                        ip='', serial='', room_id='', status='Nepriskirtas', image=''))
+                    trial = Window(trial_store)
+                    trial.show()
+                    trial.nav.setCurrentRow(1)
+                    failures = []
+                    def save_photo():
+                        dialog = QApplication.activeModalWidget()
+                        try:
+                            dialog.apply_photo(content, dialog.fields['image'], dialog.findChild(PhotoLabel))
+                            dialog.accept()
+                        except Exception as error:
+                            failures.append(str(error))
+                            dialog.reject()
+                    for attempt in range(2):
+                        QTimer.singleShot(0, save_photo)
+                        trial.edit_record('printers', trial_id)
+                        app.processEvents()
+                    assert not failures
+                    saved_image = trial_store.read()['printers'][0]['image']
+                    assert saved_image.startswith('images/')
+                    assert (trial_store.directory / saved_image).read_bytes() == content
+                    trial.close()
                 for i in range(10):
                     window.nav.setCurrentRow(i)
                     app.processEvents()

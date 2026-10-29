@@ -78,6 +78,19 @@ def relocate(store, destination, config_path=None):
         if state['demo']:
             raise ValidationError('DEMO duomenų vieta nekeičiama. Pereikite į pagrindinę programą.')
         store._backup('manual')
+        for kind in ['printers', 'cartridges']:
+            for row in state[kind]:
+                value = row.get('image', '')
+                if value.startswith('images/'):
+                    content = store.image_bytes(value)
+                    images = destination.parent / 'images'
+                    images.mkdir(exist_ok=True)
+                    target_image = images / Path(value).name
+                    if not target_image.exists():
+                        with target_image.open('xb') as image:
+                            image.write(content)
+                            image.flush()
+                            os.fsync(image.fileno())
         # Exclusive creation also refuses a destination created after our checks.
         with destination.open('x', encoding='utf-8') as f:
             json.dump(state, f, ensure_ascii=False, indent=2, allow_nan=False)

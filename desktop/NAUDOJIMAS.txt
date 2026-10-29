@@ -15,7 +15,13 @@ NUOTRAUKOS
 Spausdintuvo arba kasetės kortelėje pasirinkite nuotrauką ir spauskite
 „Išsaugoti“. Palaikomi PNG, JPG / JPEG, WebP, BMP, GIF, TIFF ir ICO.
 GIF ir kelių puslapių TIFF naudojamas pirmasis vaizdas. Vaizdas normalizuojamas
-į PNG, sumažinamas iki 640 × 640 ir įrašomas į duomenų failą.
+į PNG, sumažinamas iki 640 × 640 ir įrašomas į aplanką „images“ šalia
+pasirinkto duomenų failo. Numatytoji vieta:
+%LOCALAPPDATA%\PrintTrack\data\images\.
+Perkeliant duomenis per programos nustatymus nuotraukos perkeliamos kartu.
+Rankiniu būdu kopijuodami duomenis nukopijuokite ir visą „images“ aplanką.
+Programos sukurtos atsarginės JSON kopijos nuotraukas išsaugo savo viduje,
+todėl jas galima atkurti kitame kompiuteryje.
 Užvedus pelę ant miniatiūros sąraše ar kortelėje rodoma didesnė peržiūra.
 Failo pasirinkimas ir apdorojimas vyksta atskirame procese: jei nuotraukų
 modulis nustoja veikti, parodoma klaida ir ankstesnė nuotrauka nepakeičiama.

@@ -8,6 +8,7 @@ import json
 import os
 import re
 import uuid
+import hashlib
 from collections import defaultdict
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -142,6 +143,46 @@ def validate_filename(filename):
 
 
 class Store:
+    def image_bytes(self, value):
+        if not value:
+            return b''
+        if re.fullmatch(r'images/[a-f0-9]{64}\.png', value):
+            return (self.directory / value).read_bytes()
+        try:
+            return base64.b64decode(value, validate=True)
+        except (ValueError, TypeError):
+            return b''
+
+    def _externalize_images(self, state):
+        for kind in ['printers', 'cartridges']:
+            for row in state[kind]:
+                value = row.get('image', '')
+                if not value or value.startswith('images/'):
+                    continue
+                content = self.image_bytes(value)
+                if not content.startswith(b'\x89PNG\r\n\x1a\n'):
+                    continue  # Preserve legacy damaged values for manual replacement.
+                name = hashlib.sha256(content).hexdigest() + '.png'
+                folder = self.directory / 'images'
+                folder.mkdir(exist_ok=True)
+                path = folder / name
+                if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest() != name[:-4]:
+                    temporary = path.with_suffix('.tmp')
+                    with temporary.open('wb') as f:
+                        f.write(content)
+                        f.flush()
+                        os.fsync(f.fileno())
+                    os.replace(temporary, path)
+                row['image'] = 'images/' + name
+
+    def portable_state(self, state):
+        state = copy.deepcopy(state)
+        for kind in ['printers', 'cartridges']:
+            for row in state[kind]:
+                if re.fullmatch(r'images/[a-f0-9]{64}\.png', row.get('image', '')):
+                    row['image'] = base64.b64encode(self.image_bytes(row['image'])).decode('ascii')
+        return state
+
     def __init__(self, directory=None, demo=False, initial_catalogue=True, filename='inventory.json', create=True):
         self.directory = Path(directory or data_dir())
         validate_filename(filename)
@@ -206,7 +247,7 @@ class Store:
 
     def _backup(self, label):
         name = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%f') + '-' + label + '.json'
-        self._atomic(self.backups / name, self._read())
+        self._atomic(self.backups / name, self.portable_state(self._read()))
         # Keep the latest 60 automatic copies; manually named copies are never pruned.
         automatic = sorted(p for p in self.backups.glob('*.json') if p.stem.endswith(('-startup', '-auto')))
         for p in automatic[:-60]:
@@ -226,6 +267,7 @@ class Store:
             state['revision'] += 1
             state['events'].append(dict(id=uid(), at=now(), action=label))
             validate(state)
+            self._externalize_images(state)
             self._backup('auto')
             self._atomic(self.journal, state)
             self._atomic(self.path, state)
@@ -304,7 +346,7 @@ class Store:
             self._recover()
             path = self._backup('manual')
             if target:
-                self._atomic(Path(target), self._read())
+                self._atomic(Path(target), self.portable_state(self._read()))
             return path
 
     def restore(self, path):
