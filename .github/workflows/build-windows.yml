@@ -1,6 +1,8 @@
 name: Build PrintTrack Windows
 on:
   push:
+    branches:
+      - '**'
     paths:
       - 'desktop/**'
       - '.github/workflows/build-windows.yml'
