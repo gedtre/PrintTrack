@@ -2,6 +2,10 @@
 
 **PrintTrack Desktop** — lietuviška Windows programa spausdintuvų ir kasečių apskaitai.
 
+Šioje šakoje įtraukti naudotojo pradiniai duomenys: **102 unikalūs kabinetai,
+25 modelių kortelės, 34 kasečių kodai**. Tai tarpinė versija be modelių nuotraukų.
+[Pradinių duomenų paaiškinimas](desktop/PRADINIAI_DUOMENYS.md).
+
 ## Atsisiuntimas
 
 Atverkite [Windows kūrimo vykdymus](https://github.com/gedtre/PrintTrack/actions/workflows/build-windows.yml).

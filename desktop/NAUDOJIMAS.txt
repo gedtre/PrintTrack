@@ -1,5 +1,10 @@
 PRINTTRACK DESKTOP 1.0 — NAUDOJIMAS
 
+ŠIS RINKINYS: 102 unikalūs kabinetų numeriai, 25 modelių kortelės ir 34 kasečių
+kodai iš naudotojo pateiktų duomenų. Nuotraukos šiame tarpiniame rinkinyje dar
+neįtrauktos. Išsamiau: PRADINIAI_DUOMENYS.md. Modelių kortelės nepriskirtos
+konkretiems kabinetams; įrenginių kiekiai ir sandėlio atsargos nespėjami.
+
 1. Išskleiskite visą PrintTrack-Windows-x64.zip failą.
 2. Atverkite aplanką PrintTrack ir dukart spustelėkite PrintTrack.exe.
 3. Python ar kitų programavimo priemonių diegti nereikia.
@@ -9,7 +14,7 @@ Pirmasis paleidimas gali trukti kelias sekundes, kol išpakuojamos Qt biblioteko
 Programa neturi įsigyto skaitmeninio parašo; Windows gali rodyti nežinomo leidėjo pranešimą.
 
 PRADŽIA
-Tikras inventorius pradžioje tuščias. Pateiktas 16 kasečių katalogas yra NEPATIKRINTAS:
+Pradinis naudotojo modelių ir kasečių katalogas yra NEPATIKRINTAS:
 likučiai 0, suderinamumo patvirtinimų nėra.
 1. „Kabinetai“: sukurkite skyrius ir kabinetus.
 2. „Spausdintuvai“: užregistruokite įrenginius ir priskirkite kabinetams.

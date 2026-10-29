@@ -47,9 +47,9 @@ def data_dir():
     return Path(root) / 'PrintTrack' / 'data' if root else Path.home() / '.local' / 'share' / 'PrintTrack' / 'data'
 
 
-def empty_state(demo=False):
+def empty_state(demo=False, initial_catalogue=True):
     return dict(version=1, revision=0, demo=demo, rooms=[], printers=[],
-                cartridges=[dict(id=uid(), code=c, kind='Originali', chip='Taip' if c.endswith('with chip') else 'Nežinoma', minimum=0, image='') for c in CATALOGUE],
+                cartridges=[dict(id=uid(), code=c, kind='Originali', chip='Taip' if c.endswith('with chip') else 'Nežinoma', minimum=0, image='') for c in (CATALOGUE if initial_catalogue else [])],
                 compatibility=[], movements=[], events=[], preferences={'theme': 'Šviesi'})
 
 
@@ -89,7 +89,7 @@ def validate(state):
     for p in state['printers']:
         if p['room_id'] and p['room_id'] not in room_ids:
             raise ValidationError('Kabinetas nerastas.')
-        if p['status'] not in ['Veikia', 'Remontas', 'Nenaudojamas']:
+        if p['status'] not in ['Veikia', 'Remontas', 'Nenaudojamas', 'Nepriskirtas']:
             raise ValidationError('Nežinoma spausdintuvo būsena.')
         if p['ip']:
             import ipaddress
@@ -135,7 +135,7 @@ def validate(state):
 
 
 class Store:
-    def __init__(self, directory=None, demo=False):
+    def __init__(self, directory=None, demo=False, initial_catalogue=True):
         self.directory = Path(directory or data_dir())
         self.directory.mkdir(parents=True, exist_ok=True)
         self.path = self.directory / 'inventory.json'
@@ -145,7 +145,7 @@ class Store:
         with self.lock():
             self._recover()
             if not self.path.exists():
-                self._atomic(self.path, empty_state(demo))
+                self._atomic(self.path, empty_state(demo, initial_catalogue))
             self._read()
             self._backup('startup')
 

@@ -115,7 +115,7 @@ class RecordDialog(QDialog):
                 w.setCurrentIndex(max(0, w.findData(val)))
             elif field in ['status', 'kind', 'chip']:
                 w = QComboBox()
-                w.addItems({'status': ['Veikia', 'Remontas', 'Nenaudojamas'], 'kind': ['Originali', 'Suderinama'], 'chip': ['Nežinoma', 'Taip', 'Ne']}[field])
+                w.addItems({'status': ['Nepriskirtas', 'Veikia', 'Remontas', 'Nenaudojamas'], 'kind': ['Originali', 'Suderinama'], 'chip': ['Nežinoma', 'Taip', 'Ne']}[field])
                 if val:
                     w.setCurrentText(val)
             elif field == 'minimum':
@@ -363,15 +363,26 @@ class Window(QMainWindow):
                 if field == 'kind':
                     val = KINDS.get(val, val)
                 item = NumberItem(str(val)) if isinstance(val, (int, float)) else QTableWidgetItem(str(val))
+                if field == 'image':
+                    pix = QPixmap()
+                    try:
+                        pix.loadFromData(base64.b64decode(val, validate=True))
+                    except (ValueError, TypeError):
+                        pass
+                    item.setText('Nėra' if pix.isNull() else '')
+                    if not pix.isNull():
+                        item.setIcon(QIcon(pix))
                 item.setData(Qt.UserRole, row.get('id', ''))
                 if isinstance(val, (int, float)):
                     item.setData(Qt.UserRole + 1, val)
-                item.setToolTip(str(val))
+                item.setToolTip(('Modelio nuotrauka' if val else 'Nuotrauka neįkelta') if field == 'image' else str(val))
                 if field in ['status', 'Likutis', 'Būsena']:
                     color = '#ef6161' if str(val) in ['Nėra', 'Remontas'] else '#d49619' if str(val) in ['Mažas likutis', 'Nenaudojamas'] else '#0eaa80'
                     item.setForeground(QColor(color))
                 table.setItem(n, j, item)
-            table.setRowHeight(n, 46)
+            table.setRowHeight(n, 72 if 'image' in fields else 46)
+        if 'image' in fields:
+            table.setIconSize(QSize(90, 60))
         table.resizeColumnsToContents()
         for j in range(len(fields)):
             table.setColumnWidth(j, min(280, max(110, table.columnWidth(j))))
@@ -442,21 +453,26 @@ class Window(QMainWindow):
                 QMessageBox.warning(dialog, 'Patikrinkite įrašą', str(e))
 
     def records(self, kind):
-        fields = [f for f in SCHEMAS[kind] if f != 'image']
+        fields = (['image'] if kind == 'printers' else []) + [f for f in SCHEMAS[kind] if f != 'image']
         if kind == 'compatibility':
             fields.append('verified_at')
             self.layout.addWidget(title('Rodomi tik aiškiai patvirtinti ryšiai. Katalogas pats savaime suderinamumo nepatvirtina.', True))
         if kind == 'printers':
             self.layout.addWidget(title('Pakeitus modelį, jo suderinamumo patvirtinimai panaikinami ir turi būti patikrinti iš naujo.', True))
+            self.layout.addWidget(title('Pradinės kortelės įvestos po vieną kiekvienam modeliui. Būsena „Nepriskirtas“ nereiškia patvirtinto įrenginių kiekio. Priskirkite kabinetą ir įrašykite tikro įrenginio serijos numerį. Kasečių kodai iš pateiktos lentelės nėra patvirtintas suderinamumas.', True))
         if kind == 'cartridges':
             self.layout.addWidget(title('Pradinis katalogas nepatikrintas. Pakeitus kodą, tipą ar lustą, susiję patvirtinimai panaikinami.', True))
         rows = [dict(r) for r in self.state[kind]]
+        if kind == 'printers':
+            fields.append('Kasečių kodai (šaltinis)')
+            for r in rows:
+                r['Kasečių kodai (šaltinis)'] = r.get('source_cartridge_codes', '') or 'Nenurodyta'
         if kind == 'rooms':
             fields.append('Spausdintuvų')
             for r in rows:
                 r['Spausdintuvų'] = sum(p['room_id'] == r['id'] for p in self.state['printers'])
         table = self.make_table(fields, rows)
-        toolbar = self.search_bar(table, ['Veikia', 'Remontas', 'Nenaudojamas'] if kind == 'printers' else None)
+        toolbar = self.search_bar(table, ['Nepriskirtas', 'Veikia', 'Remontas', 'Nenaudojamas'] if kind == 'printers' else None)
         toolbar.addWidget(button('+  Naujas įrašas', lambda: self.edit_record(kind), True))
         toolbar.addWidget(button('Redaguoti', lambda: self.edit_selected(kind, table)))
         if kind == 'compatibility':
@@ -468,8 +484,12 @@ class Window(QMainWindow):
             preview.setMinimumHeight(100)
             preview.setMaximumHeight(160)
             preview.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            source_label = QLabel()
+            source_label.setTextFormat(Qt.PlainText)
+            source_label.setWordWrap(True)
             def image_preview():
                 r = next((r for r in self.state[kind] if r['id'] == self.selected_id(table)), {})
+                source_label.setText('Nuotraukos šaltinis: ' + r['image_source'] if r.get('image_source') else '')
                 pix = QPixmap()
                 try:
                     pix.loadFromData(base64.b64decode(r.get('image', '')))
@@ -482,6 +502,7 @@ class Window(QMainWindow):
                     preview.setPixmap(pix.scaled(300, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation))
             table.itemSelectionChanged.connect(image_preview)
             self.layout.addWidget(preview)
+            self.layout.addWidget(source_label)
         if not rows:
             self.layout.addWidget(title('Įrašų dar nėra. Pradėkite nuo „Naujas įrašas“.', True))
 

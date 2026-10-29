@@ -52,10 +52,19 @@ jobs:
           if (!$process.WaitForExit(90000)) { $process.Kill(); throw 'EXE startup timed out' }
           if ($process.ExitCode -ne 0) { throw "EXE smoke test failed: $($process.ExitCode)" }
           if (!(Test-Path "$data/inventory.json")) { throw 'Persistent data was not created' }
+          $initial = Get-Content desktop/printtrack/assets/initial-data.json -Raw | ConvertFrom-Json
+          $saved = Get-Content "$data/inventory.json" -Raw | ConvertFrom-Json
+          if ($saved.rooms.Count -ne $initial.rooms.Count) { throw 'Initial rooms missing from EXE' }
+          if ($saved.printers.Count -ne $initial.printers.Count) { throw 'Initial printer cards missing from EXE' }
+          if ($saved.cartridges.Count -ne $initial.cartridges.Count) { throw 'Initial cartridges missing from EXE' }
+          if ($saved.movements.Count -ne 0) { throw 'Unexpected initial stock movements' }
+          if ($saved.compatibility.Count -ne 0) { throw 'Unexpected initial compatibility approvals' }
           # Relaunch checks that a second startup reads the saved JSON successfully.
           $second = Start-Process -FilePath $exe -ArgumentList @('--smoke-test', '--data-dir', $data) -PassThru
           if (!$second.WaitForExit(90000)) { $second.Kill(); throw 'EXE relaunch timed out' }
           if ($second.ExitCode -ne 0) { throw "EXE relaunch failed: $($second.ExitCode)" }
+          $reloaded = Get-Content "$data/inventory.json" -Raw | ConvertFrom-Json
+          if ($reloaded.rooms.Count -ne $saved.rooms.Count -or $reloaded.printers.Count -ne $saved.printers.Count) { throw 'Relaunch duplicated initial records' }
       - name: Package end-user download
         shell: pwsh
         run: |
@@ -63,6 +72,7 @@ jobs:
           Copy-Item desktop/dist/PrintTrack.exe release/PrintTrack/
           Copy-Item desktop/NAUDOJIMAS.txt release/PrintTrack/
           Copy-Item desktop/THIRD-PARTY.txt release/PrintTrack/
+          Copy-Item desktop/PRADINIAI_DUOMENYS.md release/PrintTrack/
           Compress-Archive -Path release/PrintTrack -DestinationPath release/PrintTrack-Windows-x64.zip
           $hash = (Get-FileHash release/PrintTrack-Windows-x64.zip -Algorithm SHA256).Hash
           "$hash  PrintTrack-Windows-x64.zip" | Set-Content release/SHA256SUMS.txt

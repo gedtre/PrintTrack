@@ -1,0 +1,795 @@
+{
+  "format": "printtrack-initial-v1",
+  "id": "kabinetai-printers-2026-10-29-v1",
+  "rooms": [
+    {
+      "name": "1",
+      "department": "Poliklinika / Chirurgijos skyrius / Moterų konsultacija / Odontologijos skyrius / Profilaktikos skyrius / Psichikos sveikatos centras / Šeimos medicinos skyrius / Vaikų ligų skyrius / Vidaus ligų skyrius / Šeimos gydytojų kabinetai (Lelijų g.44) / Šeimos gydytojų kabinetas (Jiezno 2, Alytus)",
+      "floor": ""
+    },
+    {
+      "name": "2",
+      "department": "Šeimos gydytojų kabinetai (Lelijų g.44) / Šeimos gydytojų kabinetas (Jiezno 2, Alytus)",
+      "floor": ""
+    },
+    {
+      "name": "3",
+      "department": "Šeimos gydytojų kabinetai (Lelijų g.44) / Šeimos gydytojų kabinetas (Jiezno 2, Alytus)",
+      "floor": ""
+    },
+    {
+      "name": "4",
+      "department": "Šeimos gydytojų kabinetas (Jiezno 2, Alytus)",
+      "floor": ""
+    },
+    {
+      "name": "22",
+      "department": "Vidaus ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "101",
+      "department": "Laboratorija / Šeimos gydytojų kabinetas (Jiezno 2, Alytus)",
+      "floor": ""
+    },
+    {
+      "name": "105",
+      "department": "Psichikos dienos stacionaras",
+      "floor": ""
+    },
+    {
+      "name": "118",
+      "department": "Vidaus ligų skyrius / Profilaktikos skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "119",
+      "department": "Laboratorija",
+      "floor": ""
+    },
+    {
+      "name": "120",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "202",
+      "department": "Psichikos sveikatos centras",
+      "floor": ""
+    },
+    {
+      "name": "203",
+      "department": "Psichikos sveikatos centras",
+      "floor": ""
+    },
+    {
+      "name": "208",
+      "department": "Psichikos sveikatos centras",
+      "floor": ""
+    },
+    {
+      "name": "209",
+      "department": "Poliklinika / Psichikos dienos stacionaras",
+      "floor": ""
+    },
+    {
+      "name": "210",
+      "department": "Psichikos sveikatos centras",
+      "floor": ""
+    },
+    {
+      "name": "212",
+      "department": "Psichikos sveikatos centras / Psichikos dienos stacionaras",
+      "floor": ""
+    },
+    {
+      "name": "213",
+      "department": "Psichikos sveikatos centras",
+      "floor": ""
+    },
+    {
+      "name": "214",
+      "department": "Psichikos sveikatos centras",
+      "floor": ""
+    },
+    {
+      "name": "227",
+      "department": "Moterų konsultacija",
+      "floor": ""
+    },
+    {
+      "name": "228",
+      "department": "Moterų konsultacija",
+      "floor": ""
+    },
+    {
+      "name": "229",
+      "department": "Moterų konsultacija",
+      "floor": ""
+    },
+    {
+      "name": "231",
+      "department": "Moterų konsultacija / Psichikos sveikatos centras",
+      "floor": ""
+    },
+    {
+      "name": "232",
+      "department": "Moterų konsultacija / Psichikos sveikatos centras",
+      "floor": ""
+    },
+    {
+      "name": "234",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "235",
+      "department": "Vaikų ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "236",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "237",
+      "department": "Vaikų ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "237A",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "238",
+      "department": "Vaikų ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "239",
+      "department": "Šeimos medicinos skyrius / Vaikų ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "240",
+      "department": "Vaikų ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "241",
+      "department": "Vaikų ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "242",
+      "department": "Vaikų ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "243",
+      "department": "Vaikų ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "244A",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "245",
+      "department": "Vidaus ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "245A",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "246",
+      "department": "Laboratorija",
+      "floor": ""
+    },
+    {
+      "name": "247",
+      "department": "Moterų konsultacija",
+      "floor": ""
+    },
+    {
+      "name": "248",
+      "department": "Moterų konsultacija",
+      "floor": ""
+    },
+    {
+      "name": "250",
+      "department": "Vaikų ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "251",
+      "department": "Vaikų ligų skyrius / Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "261",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "302",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "303",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "304",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "307",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "308",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "309",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "310",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "312",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "316",
+      "department": "Vidaus ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "319",
+      "department": "Profilaktikos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "320",
+      "department": "Profilaktikos skyrius / Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "321",
+      "department": "Profilaktikos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "322",
+      "department": "Profilaktikos skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "323",
+      "department": "Profilaktikos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "324",
+      "department": "Profilaktikos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "325",
+      "department": "Profilaktikos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "327",
+      "department": "Profilaktikos skyrius / Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "401",
+      "department": "Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "401A",
+      "department": "Laboratorija",
+      "floor": ""
+    },
+    {
+      "name": "403",
+      "department": "Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "404",
+      "department": "Vidaus ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "407",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "408",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "410",
+      "department": "Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "414",
+      "department": "Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "416",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "417",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "419",
+      "department": "Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "501",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "502",
+      "department": "Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "503",
+      "department": "Vidaus ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "505",
+      "department": "Vidaus ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "506",
+      "department": "Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "507",
+      "department": "Šeimos medicinos skyrius / Chirurgijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "508",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "510",
+      "department": "Chirurgijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "512",
+      "department": "Chirurgijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "513",
+      "department": "Chirurgijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "516",
+      "department": "Vidaus ligų skyrius / Chirurgijos skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "517",
+      "department": "Chirurgijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "518",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "519",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "601",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "628",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "630",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "703",
+      "department": "Laboratorija",
+      "floor": ""
+    },
+    {
+      "name": "705",
+      "department": "Laboratorija",
+      "floor": ""
+    },
+    {
+      "name": "709",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "711",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "713",
+      "department": "Poliklinika",
+      "floor": ""
+    },
+    {
+      "name": "714",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "715",
+      "department": "Laboratorija / Vidaus ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "716",
+      "department": "Vidaus ligų skyrius",
+      "floor": ""
+    },
+    {
+      "name": "717",
+      "department": "Vidaus ligų skyrius / Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "718",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "719",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "720",
+      "department": "Šeimos medicinos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "721",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    },
+    {
+      "name": "722",
+      "department": "Odontologijos skyrius",
+      "floor": ""
+    }
+  ],
+  "cartridges": [
+    "TN-3430",
+    "TN-3480",
+    "Epson 103 Black",
+    "Epson 103 Cyan",
+    "Epson 103 Magenta",
+    "Epson 103 Yellow",
+    "Q2612A",
+    "CB435A",
+    "CB436A",
+    "CE285A",
+    "CE278A",
+    "CF505X",
+    "CF280X",
+    "CAN719H",
+    "CF217A",
+    "CF244A",
+    "CF244X",
+    "CF230A",
+    "CF230X",
+    "CF283A",
+    "CF283X",
+    "TK-310",
+    "MS310",
+    "TN-116",
+    "TN-118",
+    "MLT-D1092S",
+    "MLT-D111S",
+    "MLT-D111L",
+    "MLT-D205S",
+    "MLT-D205L",
+    "CAN057H",
+    "TK-1260",
+    "CAN725",
+    "CAN070"
+  ],
+  "printers": [
+    {
+      "model": "Brother DCP-L5500DN",
+      "source_cartridge_codes": "TN-3430 TN-3480",
+      "catalogue_codes": [
+        "TN-3430",
+        "TN-3480"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Epson L3110",
+      "source_cartridge_codes": "EPSON 103 B,C,M,Y",
+      "catalogue_codes": [
+        "Epson 103 Black",
+        "Epson 103 Cyan",
+        "Epson 103 Magenta",
+        "Epson 103 Yellow"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "HP LaserJet 1020",
+      "source_cartridge_codes": "HP 12A (Q2612A)",
+      "catalogue_codes": [
+        "Q2612A"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "HP LaserJet P1005",
+      "source_cartridge_codes": "HP 35A (CB435/436A CE285/278A)",
+      "catalogue_codes": [
+        "CB435A",
+        "CB436A",
+        "CE285A",
+        "CE278A"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "HP LaserJet Pro 400",
+      "source_cartridge_codes": "HP 80 A: X: (CF505X/CF280X/CAN719H)",
+      "catalogue_codes": [
+        "CF505X",
+        "CF280X",
+        "CAN719H"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "HP LaserJet Pro MFP M130a",
+      "source_cartridge_codes": "HP 17A (CF217A)",
+      "catalogue_codes": [
+        "CF217A"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "HP LaserJet Pro M14-M17",
+      "source_cartridge_codes": "HP 44 A: X: (CF244 A; X)",
+      "catalogue_codes": [
+        "CF244A",
+        "CF244X"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "HP LaserJet Pro M203dn",
+      "source_cartridge_codes": "HP 30 A: X (CF230 A; X)",
+      "catalogue_codes": [
+        "CF230A",
+        "CF230X"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "HP LaserJet Pro MFP 225",
+      "source_cartridge_codes": "HP 83 A: X (CF283 A: X)",
+      "catalogue_codes": [
+        "CF283A",
+        "CF283X"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Kyocera FS-3900DN",
+      "source_cartridge_codes": "TK-310",
+      "catalogue_codes": [
+        "TK-310"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "UTAX CD5130",
+      "source_cartridge_codes": "",
+      "catalogue_codes": [],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Lexmark MS 510",
+      "source_cartridge_codes": "MS310",
+      "catalogue_codes": [
+        "MS310"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Lexmark E240",
+      "source_cartridge_codes": "",
+      "catalogue_codes": [],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Minolta BizHub 185",
+      "source_cartridge_codes": "TN-116",
+      "catalogue_codes": [
+        "TN-116"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Minolta BizHub 225i",
+      "source_cartridge_codes": "TN-118",
+      "catalogue_codes": [
+        "TN-118"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Samsung SCX-4300",
+      "source_cartridge_codes": "MLT-D1092S",
+      "catalogue_codes": [
+        "MLT-D1092S"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Samsung Xpress M2026W",
+      "source_cartridge_codes": "MLT-D111 S: L:",
+      "catalogue_codes": [
+        "MLT-D111S",
+        "MLT-D111L"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Samsung ML3310",
+      "source_cartridge_codes": "MLT-D205 S: L:",
+      "catalogue_codes": [
+        "MLT-D205S",
+        "MLT-D205L"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Canon i-SENSYS LBP233dw",
+      "source_cartridge_codes": "Can057 H:",
+      "catalogue_codes": [
+        "CAN057H"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Canon i-SENSYS MF450",
+      "source_cartridge_codes": "Can057 H:",
+      "catalogue_codes": [
+        "CAN057H"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Kyocera PA-4000x",
+      "source_cartridge_codes": "TK-1260",
+      "catalogue_codes": [
+        "TK-1260"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Canon i-SENSYS MF3010",
+      "source_cartridge_codes": "CAN725 (CE285A)",
+      "catalogue_codes": [
+        "CAN725",
+        "CE285A"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Canon i-SENSYS MF463dw II",
+      "source_cartridge_codes": "CAN070",
+      "catalogue_codes": [
+        "CAN070"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "Canon i-SENSYS MF243dw",
+      "source_cartridge_codes": "CAN070",
+      "catalogue_codes": [
+        "CAN070"
+      ],
+      "image": "",
+      "image_source": ""
+    },
+    {
+      "model": "HP LaserJet Pro M203dw",
+      "source_cartridge_codes": "HP 30A (CF230 X)",
+      "catalogue_codes": [
+        "CF230X"
+      ],
+      "image": "",
+      "image_source": ""
+    }
+  ],
+  "notes": [
+    "Modelių kortelės nėra faktinio įrenginių kiekio patvirtinimas.",
+    "Kasečių kodai perrašyti iš naudotojo paveikslėlio; jų suderinamumas nepatvirtintas.",
+    "Aukštai ir spausdintuvų kabinetai nenurodyti, todėl nepriskirti."
+  ]
+}

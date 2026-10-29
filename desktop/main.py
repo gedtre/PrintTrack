@@ -9,6 +9,7 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from printtrack.store import Store, ValidationError, data_dir, demo_store
 from printtrack.ui import Window
+from printtrack.initial_data import apply_initial_data, bundled_initial_data
 
 
 def main():
@@ -28,7 +29,11 @@ def main():
     app.installTranslator(translator)
     directory = args.data_dir or (data_dir().parent / 'demo' if args.demo else data_dir())
     try:
-        store = demo_store(directory) if args.demo else Store(directory)
+        initial = None if args.demo else bundled_initial_data()
+        store = demo_store(directory) if args.demo else Store(directory, initial_catalogue=initial is None)
+        if not args.demo:
+            if initial:
+                apply_initial_data(store, initial)
     except (ValidationError, OSError) as e:
         if args.smoke_test:
             return 2
