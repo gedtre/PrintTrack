@@ -67,6 +67,21 @@ jobs:
           if ($second.ExitCode -ne 0) { throw "EXE relaunch failed: $($second.ExitCode)" }
           $reloaded = Get-Content "$data/inventory.json" -Raw | ConvertFrom-Json
           if ($reloaded.rooms.Count -ne $saved.rooms.Count -or $reloaded.printers.Count -ne $saved.printers.Count) { throw 'Relaunch duplicated initial records' }
+          # Exercise the packaged app after licence expiry without changing inventory.
+          $issued = [DateTimeOffset]::UtcNow.AddYears(-3)
+          $licencePath = Join-Path $data 'license.json'
+          @{
+            version = 1
+            issued_at = $issued.ToString('yyyy-MM-ddTHH:mm:sszzz')
+            expires_at = $issued.AddYears(2).ToString('yyyy-MM-ddTHH:mm:sszzz')
+          } | ConvertTo-Json | Set-Content -Encoding utf8 $licencePath
+          $expiredLicence = Get-Content $licencePath -Raw
+          $expired = Start-Process -FilePath $exe -ArgumentList @('--smoke-test', '--data-dir', $data) -PassThru
+          if (!$expired.WaitForExit(90000)) { $expired.Kill(); throw 'Expired licence startup timed out' }
+          if ($expired.ExitCode -ne 0) { throw 'Expired licence prevents inventory viewing' }
+          if ((Get-Content $licencePath -Raw) -ne $expiredLicence) { throw 'Expired licence was silently renewed' }
+          $afterExpiry = Get-Content "$data/inventory.json" -Raw | ConvertFrom-Json
+          if ($afterExpiry.revision -ne $reloaded.revision) { throw 'Expired startup modified inventory' }
       - name: Package end-user download
         shell: pwsh
         run: |

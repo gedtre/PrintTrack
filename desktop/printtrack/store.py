@@ -135,7 +135,8 @@ def validate(state):
 
 
 class Store:
-    def __init__(self, directory=None, demo=False, initial_catalogue=True):
+    def __init__(self, directory=None, demo=False, initial_catalogue=True, write_check=None):
+        self.write_check = write_check
         self.directory = Path(directory or data_dir())
         self.directory.mkdir(parents=True, exist_ok=True)
         self.path = self.directory / 'inventory.json'
@@ -207,6 +208,8 @@ class Store:
 
     def mutate(self, operation, label):
         with self.lock():
+            if self.write_check:
+                self.write_check()
             self._recover()
             state = self._read()
             result = operation(state)

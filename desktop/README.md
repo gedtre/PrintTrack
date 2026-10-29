@@ -45,6 +45,23 @@ Compatibility starts empty, and requires evidence entered by a responsible user.
 
 ## Scope and limits
 
+The packaged application has an offline free licence lasting two calendar years
+from its first launch on that Windows account. The start and expiry are stored
+outside inventory backups in `%LOCALAPPDATA%/PrintTrack/license.json`; replacing
+the EXE or restoring an inventory snapshot does not renew it. Custom `--data-dir`
+instances keep a separate `license.json` inside that directory for isolated tests.
+February 29 expires on February 28 two years later. At expiry a popup gives
+`gedtre@gmail.com`; all mutations are refused at the store boundary, including
+CSV import and inventory restore. Viewing, reports, exports and backup creation
+remain available. An open app checks expiry every five seconds and at each write.
+This is a local licence check, not a signed or server-managed activation system;
+it does not prevent deliberate clock or licence-file manipulation.
+
+Do not share the desktop JSON file for concurrent LAN clients. The repository's
+web/server variant uses PostgreSQL and is the appropriate architecture for shared
+inventory. Desktop-to-server data migration requires a separate importer; it is
+not automatic.
+
 Single workstation, local filesystem. JSON is not encrypted or cryptographically
 signed. Windows account/filesystem permissions govern access. History is protected
 against application deletion, not deliberate external file editing. No network

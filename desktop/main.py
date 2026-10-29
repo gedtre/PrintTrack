@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 from printtrack.store import Store, ValidationError, data_dir, demo_store
 from printtrack.ui import Window
 from printtrack.initial_data import apply_initial_data, bundled_initial_data
+from printtrack.licensing import Licence
 
 
 def main():
@@ -28,11 +29,18 @@ def main():
     translator.load('qt_lt', QLibraryInfo.path(QLibraryInfo.TranslationsPath))
     app.installTranslator(translator)
     directory = args.data_dir or (data_dir().parent / 'demo' if args.demo else data_dir())
+    licence_path = directory / 'license.json' if args.data_dir else data_dir().parent / 'license.json'
+    licence = Licence(licence_path)
     try:
         initial = None if args.demo else bundled_initial_data()
-        store = demo_store(directory) if args.demo else Store(directory, initial_catalogue=initial is None)
+        if args.demo and licence.status().active:
+            store = demo_store(directory)
+        else:
+            store = Store(directory, demo=args.demo, initial_catalogue=initial is None,
+                          write_check=licence.require_active)
+        store.write_check = licence.require_active
         if not args.demo:
-            if initial:
+            if initial and licence.status().active:
                 apply_initial_data(store, initial)
     except (ValidationError, OSError) as e:
         if args.smoke_test:
@@ -49,11 +57,13 @@ def main():
         if not path:
             return 1
         try:
+            licence.require_active()
             store = Store.recover_backup(directory, path)
         except (OSError, ValueError) as error:
             QMessageBox.critical(None, 'Atkūrimas nepavyko', str(error))
             return 1
-    window = Window(store)
+    store.write_check = licence.require_active
+    window = Window(store, licence=licence, licence_notifications=not args.smoke_test)
     window.show()
     if args.smoke_test:
         def smoke():
