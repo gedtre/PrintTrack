@@ -434,6 +434,12 @@ class Window(QMainWindow):
         except (ValidationError, OSError) as e:
             QMessageBox.critical(self, 'Duomenų saugykla', str(e))
             return
+        old_page = self.page_area.widget()
+        if old_page is not None:
+            # Removing selected table items emits selection signals during teardown.
+            # Their callbacks must not access photo labels being deleted with the page.
+            for old_table in old_page.findChildren(QTableWidget):
+                old_table.blockSignals(True)
         self.apply_theme()
         self.heading.setText(PAGES[self.current][1])
         page = QWidget()
@@ -621,6 +627,8 @@ class Window(QMainWindow):
             source_label.setTextFormat(Qt.PlainText)
             source_label.setWordWrap(True)
             def image_preview():
+                if not all(isValid(widget) for widget in (table, preview, source_label)):
+                    return
                 r = next((r for r in self.state[kind] if r['id'] == self.selected_id(table)), {})
                 source_label.setText('Nuotraukos šaltinis: ' + r['image_source'] if r.get('image_source') else '')
                 pix = QPixmap()
