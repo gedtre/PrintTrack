@@ -86,6 +86,22 @@ class Chart(QWidget):
             p.drawText(x, baseline - h - 24, int(slot * .6), 22, Qt.AlignCenter, str(value))
 
 
+class ImageField(QWidget):
+    """Keep encoded image data outside QLineEdit's 32,767-character limit."""
+    def __init__(self, value=''):
+        super().__init__()
+        self.value = value
+
+    def text(self):
+        return self.value
+
+    def setText(self, value):
+        self.value = value
+
+    def clear(self):
+        self.value = ''
+
+
 class RecordDialog(QDialog):
     def __init__(self, parent, kind, state, existing=None):
         super().__init__(parent)
@@ -123,7 +139,7 @@ class RecordDialog(QDialog):
                 w.setRange(0, 1000000)
                 w.setValue(int(val or 0))
             elif field == 'image':
-                w = QLineEdit(str(val))
+                w = ImageField(str(val))
                 w.setVisible(False)
                 box = QWidget()
                 row = QHBoxLayout(box)
@@ -163,10 +179,12 @@ class RecordDialog(QDialog):
         from PySide6.QtCore import QBuffer, QIODevice
         pix = pix.scaled(640, 640, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         buf = QBuffer()
-        buf.open(QIODevice.WriteOnly)
-        pix.save(buf, 'PNG')
+        if not buf.open(QIODevice.WriteOnly) or not pix.save(buf, 'PNG'):
+            QMessageBox.warning(self, 'Nuotrauka', 'Nepavyko paruošti nuotraukos. Ankstesnė nuotrauka nepakeista.')
+            return
         field.setText(base64.b64encode(bytes(buf.data())).decode())
-        label.setText('Nuotrauka įkelta')
+        label.setPixmap(pix.scaled(140, 90, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        label.setToolTip('Nuotrauka paruošta. Spauskite „Išsaugoti“.')
 
     def values(self):
         result = {}
