@@ -30,7 +30,7 @@ def test_large_photo_survives_upload_edit_save_and_restart(qtbot, tmp_path, monk
     monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *a, **kw: (str(photo), ''))
     label = QLabel()
     qtbot.addWidget(label)
-    dialog.pick_image(dialog.fields['image'], label)
+    dialog.load_photo(photo, dialog.fields['image'], label)
     encoded = dialog.values()['image']
     assert len(encoded) > 32767
     pix = QPixmap()
@@ -61,12 +61,12 @@ def test_cancel_or_invalid_image_keeps_previous_photo(qtbot, tmp_path, monkeypat
     field.setText('existing-photo')
     label = QLabel('Įkelta')
     qtbot.addWidget(label)
-    monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *a, **kw: ('', ''))
+    monkeypatch.setattr('printtrack.ui.isolated_photo', lambda *a: None)
     dialog.pick_image(field, label)
     assert field.text() == 'existing-photo'
     invalid = tmp_path / 'invalid.png'
     invalid.write_text('not an image')
-    monkeypatch.setattr(QFileDialog, 'getOpenFileName', lambda *a, **kw: (str(invalid), ''))
+    monkeypatch.setattr('printtrack.ui.isolated_photo', lambda *a: photo_png(invalid))
     messages = []
     monkeypatch.setattr(QMessageBox, 'warning', lambda *a, **kw: messages.append(a))
     dialog.pick_image(field, label)
@@ -91,11 +91,11 @@ def test_real_pick_button_uses_non_native_dialog(qtbot, tmp_path, monkeypatch):
     dialog = RecordDialog(None, 'printers', store.read())
     qtbot.addWidget(dialog)
     calls = []
-    def choose(*args, **kwargs):
-        calls.append(kwargs['options'])
-        return str(path), ''
-    monkeypatch.setattr(QFileDialog, 'getOpenFileName', choose)
+    def choose(*args):
+        calls.append(True)
+        return photo_png(path)
+    monkeypatch.setattr('printtrack.ui.isolated_photo', choose)
     pick = next(b for b in dialog.findChildren(QPushButton) if b.text() == 'Pasirinkti…')
     qtbot.mouseClick(pick, Qt.LeftButton)
-    assert calls[0] & QFileDialog.DontUseNativeDialog
+    assert calls
     assert dialog.values()['image']

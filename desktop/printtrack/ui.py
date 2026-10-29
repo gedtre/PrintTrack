@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComb
 
 from .store import SCHEMAS, Store, ValidationError, demo_store, kpis, stock, usage, write_csv
 from .images import photo_png
+from .photo_service import isolated_photo
 
 LABELS = {'name': 'Pavadinimas', 'department': 'Skyrius', 'floor': 'Aukštas', 'model': 'Modelis',
           'ip': 'IP adresas', 'serial': 'Serijos numeris', 'room_id': 'Kabinetas', 'status': 'Būsena',
@@ -87,6 +88,53 @@ class Chart(QWidget):
             p.drawText(x, baseline - h - 24, int(slot * .6), 22, Qt.AlignCenter, str(value))
 
 
+class PhotoLabel(QLabel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original = QPixmap()
+        self.popup = QLabel(self, Qt.ToolTip)
+        self.popup.setAttribute(Qt.WA_ShowWithoutActivating)
+        self.popup.setStyleSheet('background: white; border: 1px solid #94a3b8; padding: 8px;')
+        self.setAlignment(Qt.AlignCenter)
+
+    def setPixmap(self, pixmap):
+        self.original = QPixmap(pixmap)
+        super().setPixmap(pixmap.scaled(max(1, self.width()), max(1, self.height()), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+    def setText(self, text):
+        if hasattr(self, 'original'):
+            self.original = QPixmap()
+            self.popup.hide()
+        super().setText(text)
+
+    def resizeEvent(self, event):
+        if not self.original.isNull():
+            super().setPixmap(self.original.scaled(max(1, self.width()), max(1, self.height()), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        super().resizeEvent(event)
+
+    def enterEvent(self, event):
+        if not self.original.isNull():
+            pix = self.original.scaled(520, 520, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.popup.setPixmap(pix)
+            self.popup.adjustSize()
+            from PySide6.QtGui import QCursor
+            point = QCursor.pos()
+            screen = self.screen().availableGeometry()
+            point.setX(max(screen.left(), min(point.x() + 18, screen.right() - self.popup.width())))
+            point.setY(max(screen.top(), min(point.y() + 18, screen.bottom() - self.popup.height())))
+            self.popup.move(point)
+            self.popup.show()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.popup.hide()
+        super().leaveEvent(event)
+
+    def hideEvent(self, event):
+        self.popup.hide()
+        super().hideEvent(event)
+
+
 class ImageField(QWidget):
     """Keep encoded image data outside QLineEdit's 32,767-character limit."""
     def __init__(self, value=''):
@@ -145,7 +193,16 @@ class RecordDialog(QDialog):
                 box = QWidget()
                 row = QHBoxLayout(box)
                 row.setContentsMargins(0, 0, 0, 0)
-                preview = QLabel('Nuotrauka įkelta' if val else 'Neįkelta')
+                preview = PhotoLabel('Nuotrauka įkelta' if val else 'Neįkelta')
+                preview.setFixedSize(150, 95)
+                if val:
+                    pix = QPixmap()
+                    try:
+                        pix.loadFromData(base64.b64decode(val))
+                    except ValueError:
+                        pass
+                    if not pix.isNull():
+                        preview.setPixmap(pix)
                 row.addWidget(preview)
                 row.addWidget(button('Pasirinkti…', lambda checked=False, field=w, label=preview: self.pick_image(field, label)))
                 row.addWidget(button('Pašalinti', lambda checked=False, field=w, label=preview: (field.clear(), label.setText('Neįkelta'))))
@@ -170,16 +227,26 @@ class RecordDialog(QDialog):
         layout.addWidget(controls)
 
     def pick_image(self, field, label):
-        # Avoid Windows shell thumbnail/preview extensions inside the EXE process.
-        path, _ = QFileDialog.getOpenFileName(self, 'Pasirinkti nuotrauką', '',
-            'Vaizdai (*.png *.jpg *.jpeg *.webp)', options=QFileDialog.DontUseNativeDialog)
-        if not path:
-            return
-        self.load_photo(path, field, label)
+        self.setEnabled(False)
+        try:
+            content = isolated_photo()
+            if content is not None:
+                self.apply_photo(content, field, label)
+        except (ValidationError, RuntimeError) as error:
+            QMessageBox.warning(self, 'Nuotrauka', str(error))
+        finally:
+            self.setEnabled(True)
+            self.activateWindow()
 
     def load_photo(self, path, field, label):
         try:
-            content = photo_png(path)
+            content = isolated_photo(path)
+            self.apply_photo(content, field, label)
+        except (ValidationError, RuntimeError) as error:
+            QMessageBox.warning(self, 'Nuotrauka', str(error))
+
+    def apply_photo(self, content, field, label):
+        try:
             pix = QPixmap()
             if not pix.loadFromData(content, 'PNG'):
                 raise ValidationError('Nepavyko parodyti nuotraukos. Ankstesnė nuotrauka nepakeista.')
@@ -187,7 +254,7 @@ class RecordDialog(QDialog):
             QMessageBox.warning(self, 'Nuotrauka', str(error))
             return
         field.setText(base64.b64encode(content).decode())
-        label.setPixmap(pix.scaled(140, 90, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        label.setPixmap(pix if isinstance(label, PhotoLabel) else pix.scaled(140, 90, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         label.setToolTip('Nuotrauka paruošta. Spauskite „Išsaugoti“.')
 
     def values(self):
@@ -395,6 +462,10 @@ class Window(QMainWindow):
                     item.setText('Nėra' if pix.isNull() else '')
                     if not pix.isNull():
                         item.setIcon(QIcon(pix))
+                        photo = PhotoLabel()
+                        photo.setMinimumSize(85, 65)
+                        photo.setPixmap(pix)
+                        table.setCellWidget(n, j, photo)
                 item.setData(Qt.UserRole, row.get('id', ''))
                 if isinstance(val, (int, float)):
                     item.setData(Qt.UserRole + 1, val)
@@ -503,7 +574,7 @@ class Window(QMainWindow):
         table.doubleClicked.connect(lambda: self.edit_selected(kind, table))
         self.layout.addWidget(table, 1)
         if kind in ['printers', 'cartridges']:
-            preview = QLabel('Pasirinkite įrašą, kad pamatytumėte jo nuotrauką.')
+            preview = PhotoLabel('Pasirinkite įrašą, kad pamatytumėte jo nuotrauką.')
             preview.setMinimumHeight(100)
             preview.setMaximumHeight(160)
             preview.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -522,7 +593,7 @@ class Window(QMainWindow):
                     preview.clear()
                     preview.setText('Nuotrauka neįkelta.')
                 else:
-                    preview.setPixmap(pix.scaled(300, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                    preview.setPixmap(pix)
             table.itemSelectionChanged.connect(image_preview)
             self.layout.addWidget(preview)
             self.layout.addWidget(source_label)

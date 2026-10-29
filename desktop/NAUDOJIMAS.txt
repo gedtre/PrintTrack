@@ -11,6 +11,15 @@ konkretiems kabinetams; įrenginių kiekiai ir sandėlio atsargos nespėjami.
 
 Reikalavimai: Windows 10 / 11, 64 bitų. Programa veikia be interneto.
 
+NUOTRAUKOS
+Spausdintuvo arba kasetės kortelėje pasirinkite nuotrauką ir spauskite
+„Išsaugoti“. Palaikomi PNG, JPG / JPEG, WebP, BMP, GIF, TIFF ir ICO.
+GIF ir kelių puslapių TIFF naudojamas pirmasis vaizdas. Vaizdas normalizuojamas
+į PNG, sumažinamas iki 640 × 640 ir įrašomas į duomenų failą.
+Užvedus pelę ant miniatiūros sąraše ar kortelėje rodoma didesnė peržiūra.
+Failo pasirinkimas ir apdorojimas vyksta atskirame procese: jei nuotraukų
+modulis nustoja veikti, parodoma klaida ir ankstesnė nuotrauka nepakeičiama.
+
 GALIOJIMAS
 Programos galiojimo termino ir licencijos tikrinimo nėra. Ankstesnio leidimo
 license.json ignoruojamas, jo šalinti nereikia.

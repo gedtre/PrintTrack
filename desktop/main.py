@@ -4,6 +4,10 @@ import os
 import sys
 from pathlib import Path
 
+if __name__ == '__main__' and len(sys.argv) in (3, 4) and sys.argv[1] == '--photo-worker':
+    from printtrack.photo_worker import run
+    sys.exit(run(sys.argv[2], sys.argv[3] if len(sys.argv) == 4 else None))
+
 from PySide6.QtCore import QTimer, QTranslator, QLibraryInfo
 from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
@@ -84,11 +88,12 @@ def main():
                 from PIL import Image
                 from PySide6.QtGui import QPixmap
                 from printtrack.images import photo_png
+                from printtrack.photo_service import isolated_photo
                 with tempfile.TemporaryDirectory(prefix='printtrack-photo-') as temporary:
                     photo = Path(temporary) / 'transparent-printer.png'
                     Image.new('RGBA', (960, 960), (40, 50, 60, 128)).save(photo)
                     pix = QPixmap()
-                    assert pix.loadFromData(photo_png(photo), 'PNG')
+                    assert pix.loadFromData(isolated_photo(photo), 'PNG')
                     assert pix.width() == 640 and pix.height() == 640
                 for i in range(10):
                     window.nav.setCurrentRow(i)

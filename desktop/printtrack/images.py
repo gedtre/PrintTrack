@@ -12,8 +12,8 @@ def photo_png(path):
         with warnings.catch_warnings():
             warnings.simplefilter('error', Image.DecompressionBombWarning)
             with Image.open(path) as source:
-                if source.format not in ['PNG', 'JPEG', 'WEBP']:
-                    raise ValidationError('Pasirinkite PNG, JPG / JPEG arba WebP nuotrauką.')
+                if source.format not in ['PNG', 'JPEG', 'WEBP', 'BMP', 'GIF', 'TIFF', 'ICO', 'AVIF']:
+                    raise ValidationError('Pasirinkite PNG, JPG, WebP, BMP, GIF, TIFF arba ICO nuotrauką.')
                 if source.width * source.height > 40_000_000:
                     raise ValidationError('Nuotrauka per didelė. Sumažinkite ją iki 40 milijonų taškų.')
                 image = ImageOps.exif_transpose(source).convert('RGBA')
