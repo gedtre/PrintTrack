@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComb
     QTableWidget, QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget)
 
 from .store import SCHEMAS, Store, ValidationError, demo_store, kpis, stock, usage, write_csv
+from .images import photo_png
 
 LABELS = {'name': 'Pavadinimas', 'department': 'Skyrius', 'floor': 'Aukštas', 'model': 'Modelis',
           'ip': 'IP adresas', 'serial': 'Serijos numeris', 'room_id': 'Kabinetas', 'status': 'Būsena',
@@ -169,20 +170,23 @@ class RecordDialog(QDialog):
         layout.addWidget(controls)
 
     def pick_image(self, field, label):
-        path, _ = QFileDialog.getOpenFileName(self, 'Pasirinkti nuotrauką', '', 'Vaizdai (*.png *.jpg *.jpeg *.webp)')
+        # Avoid Windows shell thumbnail/preview extensions inside the EXE process.
+        path, _ = QFileDialog.getOpenFileName(self, 'Pasirinkti nuotrauką', '',
+            'Vaizdai (*.png *.jpg *.jpeg *.webp)', options=QFileDialog.DontUseNativeDialog)
         if not path:
             return
-        pix = QPixmap(path)
-        if pix.isNull():
-            QMessageBox.warning(self, 'Nuotrauka', 'Nepavyko atidaryti vaizdo.')
+        self.load_photo(path, field, label)
+
+    def load_photo(self, path, field, label):
+        try:
+            content = photo_png(path)
+            pix = QPixmap()
+            if not pix.loadFromData(content, 'PNG'):
+                raise ValidationError('Nepavyko parodyti nuotraukos. Ankstesnė nuotrauka nepakeista.')
+        except (ValidationError, RuntimeError) as error:
+            QMessageBox.warning(self, 'Nuotrauka', str(error))
             return
-        from PySide6.QtCore import QBuffer, QIODevice
-        pix = pix.scaled(640, 640, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        buf = QBuffer()
-        if not buf.open(QIODevice.WriteOnly) or not pix.save(buf, 'PNG'):
-            QMessageBox.warning(self, 'Nuotrauka', 'Nepavyko paruošti nuotraukos. Ankstesnė nuotrauka nepakeista.')
-            return
-        field.setText(base64.b64encode(bytes(buf.data())).decode())
+        field.setText(base64.b64encode(content).decode())
         label.setPixmap(pix.scaled(140, 90, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         label.setToolTip('Nuotrauka paruošta. Spauskite „Išsaugoti“.')
 

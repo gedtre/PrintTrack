@@ -79,6 +79,17 @@ def main():
     if args.smoke_test:
         def smoke():
             try:
+                # Exercise the actual packaged PNG decoder and Qt display path.
+                import tempfile
+                from PIL import Image
+                from PySide6.QtGui import QPixmap
+                from printtrack.images import photo_png
+                with tempfile.TemporaryDirectory(prefix='printtrack-photo-') as temporary:
+                    photo = Path(temporary) / 'transparent-printer.png'
+                    Image.new('RGBA', (960, 960), (40, 50, 60, 128)).save(photo)
+                    pix = QPixmap()
+                    assert pix.loadFromData(photo_png(photo), 'PNG')
+                    assert pix.width() == 640 and pix.height() == 640
                 for i in range(10):
                     window.nav.setCurrentRow(i)
                     app.processEvents()
