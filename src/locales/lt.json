@@ -76,7 +76,11 @@
     "ALREADY_REVERSED": "Operacija jau atšaukta arba pati yra atšaukimo įrašas.",
     "STOCK_FILTERS": "Dabartinio sandėlio likučio negalima filtruoti pagal datą, skyrių ar spausdintuvą.",
     "CONFLICT": "Toks įrašas jau yra arba duomenys nesuderinami. Patikrinkite unikalius numerius.",
-    "DATABASE_ERROR": "Duomenų bazės operacija nepavyko. Bandykite dar kartą."
+    "DATABASE_ERROR": "Duomenų bazės operacija nepavyko. Bandykite dar kartą.",
+    "IMPORT_FORMAT": "Netinkamas CSV formatas arba stulpelių pavadinimai. Naudokite CSV UTF-8 su kabliataškiais arba kableliais.",
+    "IMPORT_BUILDING": "Pasirinktas pastatas neberastas. Atnaujinkite sąrašą.",
+    "IMPORT_LIMIT": "Failas per didelis. Leidžiama iki 1 MB ir 500 eilučių.",
+    "IMPORT_INVALID": "Importas sustabdytas. Peržiūrėkite iš naujo ir ištaisykite klaidingas eilutes."
   },
   "app": {
     "yes": "Taip",
@@ -199,5 +203,44 @@
     "monthly": "Sunaudojimas pagal mėnesį",
     "printer": "Sunaudojimas pagal spausdintuvą",
     "department": "Sunaudojimas pagal skyrių"
+  },
+  "roomImport": {
+    "title": "Importuoti kabinetus iš CSV",
+    "help": "Pirmiausia sukurkite pastatus skiltyje „Pastatai“. Pasirinkite CSV UTF-8 failą, peržiūrėkite eilutes ir tik tada patvirtinkite importą. XLSX skirtas peržiūrai – jį išsaugokite kaip CSV UTF-8.",
+    "warning": "Pastatų ir aukštų sistema nespėja. Bendros reikšmės užpildo tik tuščius CSV laukus. „II lygis“ nėra automatiškai laikomas aukštu. Numeriai su taškais ar kitais ženklais lieka nepakeisti.",
+    "file": "CSV failas",
+    "building": "Pastatas (tuštiems CSV laukams)",
+    "floor": "Aukštas (tuštiems CSV laukams)",
+    "fromFile": "Naudoti tik CSV reikšmes",
+    "columns": "CSV stulpeliai: importuoti; numeris; pavadinimas; padalinys; pastatas; aukstas. importuoti=ne praleidžia eilutę. Tuščias pavadinimas tampa „Kabinetas <numeris>“. Šaltinio datos ir pastabos į kabinetų laukus neperkeliamos.",
+    "preview": "Peržiūrėti importą",
+    "commit": "Importuoti patikrintas eilutes",
+    "done": "Sukurta kabinetų: {{created}}. Esamų: {{existing}}. Praleista: {{skipped}}.",
+    "counts": "Paruošta: {{ready}}. Esamų: {{existing}}. Praleista: {{skipped}}. Su klaidomis: {{error}}.",
+    "newDepartments": "Bus sukurti nauji padaliniai",
+    "line": "CSV eilutė",
+    "number": "Numeris",
+    "name": "Pavadinimas",
+    "department": "Padalinys",
+    "status": "Patikra",
+    "issues": {
+      "FLAG": "importuoti turi būti taip arba ne.",
+      "NUMBER": "Trūksta numerio.",
+      "DEPARTMENT": "Trūksta padalinio.",
+      "BUILDING": "Trūksta pastato.",
+      "FLOOR": "Trūksta aukšto.",
+      "UNKNOWN_BUILDING": "Pastatas nerastas; sukurkite jį skiltyje Pastatai.",
+      "LENGTH": "Viršytas lauko ilgis.",
+      "DUPLICATE_NUMBER": "Šis numeris faile kartojasi tame pačiame pastate.",
+      "EXISTING_CONFLICT": "Toks numeris pastate jau yra su kitokiais duomenimis."
+    },
+    "atomic": "Jei bent viena pasirinkta eilutė klaidinga, visas importas blokuojamas. Identiški esami įrašai praleidžiami, kitokie neperrašomi. Prieš importuodami patikrinkite numerių variantus šaltinyje.",
+    "confirm": "Importuoti patikrintus kabinetus ir sukurti trūkstamus padalinius?",
+    "states": {
+      "ready": "Paruošta",
+      "existing": "Jau yra",
+      "skipped": "Praleista",
+      "error": "Klaida"
+    }
   }
 }

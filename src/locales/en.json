@@ -76,7 +76,11 @@
     "ALREADY_REVERSED": "This transaction has already been reversed or is itself a reversal.",
     "STOCK_FILTERS": "Current stock cannot be filtered by date, department or printer.",
     "CONFLICT": "A record already exists or conflicts with the submitted data. Check unique identifiers.",
-    "DATABASE_ERROR": "The database operation failed. Please try again."
+    "DATABASE_ERROR": "The database operation failed. Please try again.",
+    "IMPORT_FORMAT": "Invalid CSV format or headers. Use UTF-8 CSV with semicolon or comma separators.",
+    "IMPORT_BUILDING": "Selected building no longer exists. Refresh the list.",
+    "IMPORT_LIMIT": "File too large. Maximum 1 MB and 500 rows.",
+    "IMPORT_INVALID": "Import blocked. Preview again and fix invalid rows."
   },
   "app": {
     "yes": "Yes",
@@ -199,5 +203,44 @@
     "monthly": "Monthly consumption",
     "printer": "Consumption by printer",
     "department": "Consumption by department"
+  },
+  "roomImport": {
+    "title": "Import rooms from CSV",
+    "help": "First create buildings in Buildings. Select a UTF-8 CSV file, preview the rows, then confirm the import. XLSX is for reviewing; save it as UTF-8 CSV before uploading.",
+    "warning": "Buildings and floors are never guessed. Defaults fill only empty CSV cells. “II lygis” is not interpreted as a floor. Punctuation in room numbers is preserved.",
+    "file": "CSV file",
+    "building": "Building (for empty CSV cells)",
+    "floor": "Floor (for empty CSV cells)",
+    "fromFile": "Use CSV values only",
+    "columns": "CSV columns: importuoti; numeris; pavadinimas; padalinys; pastatas; aukstas. importuoti=ne skips a row. A blank name becomes “Kabinetas <number>”. Source dates and notes are not mapped to room fields.",
+    "preview": "Preview import",
+    "commit": "Import validated rows",
+    "done": "Rooms created: {{created}}. Existing: {{existing}}. Skipped: {{skipped}}.",
+    "counts": "Ready: {{ready}}. Existing: {{existing}}. Skipped: {{skipped}}. Errors: {{error}}.",
+    "newDepartments": "New departments to create",
+    "line": "CSV line",
+    "number": "Number",
+    "name": "Name",
+    "department": "Department",
+    "status": "Validation",
+    "issues": {
+      "FLAG": "importuoti must be taip or ne.",
+      "NUMBER": "Room number is required.",
+      "DEPARTMENT": "Department is required.",
+      "BUILDING": "Building is required.",
+      "FLOOR": "Floor is required.",
+      "UNKNOWN_BUILDING": "Building not found; create it in Buildings.",
+      "LENGTH": "A field exceeds its length limit.",
+      "DUPLICATE_NUMBER": "This number appears more than once in the same building in the file.",
+      "EXISTING_CONFLICT": "This room number already exists in the building with different details."
+    },
+    "atomic": "Any error in a selected row blocks the entire import. Identical existing records are skipped; conflicting records are never overwritten. Review number variants against the source before importing.",
+    "confirm": "Import validated rooms and create missing departments?",
+    "states": {
+      "ready": "Ready",
+      "existing": "Existing",
+      "skipped": "Skipped",
+      "error": "Error"
+    }
   }
 }

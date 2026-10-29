@@ -10,3 +10,6 @@ __pycache__/
 playwright-report/
 test-results/
 *.dump
+
+# User-provided institution data stays local, outside the source repository.
+/local-imports/

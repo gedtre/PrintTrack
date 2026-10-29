@@ -13,3 +13,4 @@ attachments
 test-results
 playwright-report
 *.dump
+local-imports

@@ -5,12 +5,18 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from . import auth, catalog, inventory, reports
+from . import auth, catalog, inventory, reports, room_import
 from .config import settings
 from .db import Session
 
 app = FastAPI(title="PrintTrack API", version="1.0.0", docs_url=None, redoc_url=None)
-for router in (auth.router, catalog.router, inventory.router, reports.router):
+for router in (
+    auth.router,
+    catalog.router,
+    inventory.router,
+    reports.router,
+    room_import.router,
+):
     app.include_router(router)
 
 

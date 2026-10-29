@@ -159,3 +159,7 @@ Patikrų rezultatai ir jų ribos: [docs/VALIDATION.md](docs/VALIDATION.md).
 ### Tik Codex debesijos aplinkai
 
 Kai įprastą Docker surinkimą blokuoja debesijos DNS, `deploy/cloud-build.py --project <Compose-projekto-vardas>` gali panaudoti jau suteiktą HTTPS tarpinį serverį ir patikimą sertifikatą. TLS tikrinimas išlieka įjungtas; įprastam Windows paleidimui šio pagalbininko nereikia. `python deploy/init_demo_env.py --demo` yra alternatyva DEMO `.env` sukurti, jei turite Python; esamo failo ji neperrašo.
+
+### Kabinetų importas
+
+Kabinetų puslapyje administratorius ir IT specialistas gali įkelti CSV UTF-8, peržiūrėti eilutes ir patvirtinti vientisą importą. Pastatai ir aukštai neišgalvojami, identiški esami įrašai praleidžiami, konfliktuojantys neperrašomi. [Instrukcija ir stulpelių aprašymas](docs/ROOM_IMPORT.md).
