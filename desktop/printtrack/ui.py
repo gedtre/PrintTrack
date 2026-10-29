@@ -176,11 +176,9 @@ class RecordDialog(QDialog):
 
 
 class Window(QMainWindow):
-    def __init__(self, store, licence=None, licence_notifications=True):
+    def __init__(self, store, config_path=None):
         super().__init__()
-        self.licence = licence
-        self.licence_notifications = licence_notifications
-        self.licence_notice_shown = False
+        self.config_path = config_path
         self.store = store
         self.state = store.read()
         self.current = 0
@@ -232,10 +230,6 @@ class Window(QMainWindow):
         area.addLayout(header)
         self.hint = title('Aiški apskaita. Patikrintas suderinamumas. Kontroliuojami likučiai.', True)
         area.addWidget(self.hint)
-        self.licence_banner = QLabel()
-        self.licence_banner.setWordWrap(True)
-        self.licence_banner.setObjectName('licenceBanner')
-        area.addWidget(self.licence_banner)
         self.page_area = QScrollArea()
         self.page_area.setWidgetResizable(True)
         self.page_area.setFrameShape(QFrame.NoFrame)
@@ -249,22 +243,7 @@ class Window(QMainWindow):
         self.refresh()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_revision)
-        self.timer.timeout.connect(self.check_licence)
         self.timer.start(5000)
-        QTimer.singleShot(0, self.check_licence)
-
-    def check_licence(self):
-        if not self.licence:
-            self.licence_banner.hide()
-            return
-        status = self.licence.status()
-        self.licence_banner.setText(status.message + ('' if status.active else ' · Tik peržiūra ir eksportas.'))
-        self.licence_banner.show()
-        if not status.active and not self.licence_notice_shown:
-            self.licence_notice_shown = True
-            if self.licence_notifications:
-                QMessageBox.information(self, 'PrintTrack · Nemokama licencija',
-                    status.message + '\n\nDuomenys išsaugoti. Galite juos peržiūrėti, eksportuoti ir išsaugoti atsarginę kopiją.')
 
     def check_revision(self):
         try:
@@ -348,7 +327,7 @@ class Window(QMainWindow):
         else:
             self.settings()
         self.page_area.setWidget(page)
-        self.status.setText(f'{"DEMO · " if self.state["demo"] else ""}Saugykla: {self.store.directory}  ·  Versija {self.state["revision"]}')
+        self.status.setText(f'{"DEMO · " if self.state["demo"] else ""}Duomenų failas: {self.store.path}  ·  Versija {self.state["revision"]}')
 
     def card(self, heading):
         card = QFrame()
@@ -692,10 +671,17 @@ class Window(QMainWindow):
             self.guard(lambda: self.store.export_csv(kind, path))
 
     def settings(self):
-        if self.licence:
-            card = self.card('Nemokama licencija')
-            card.addWidget(title(self.licence.status().message, True))
-            card.addWidget(title('Galioja dvejus kalendorinius metus nuo pirmojo šios versijos paleidimo šiame kompiuteryje. Programos atnaujinimas arba inventoriaus kopijos atkūrimas termino nepratęsia. Kontaktas: gedtre@gmail.com', True))
+        location = self.card('Duomenų failo vieta')
+        current_path = QLineEdit(str(self.store.path))
+        current_path.setReadOnly(True)
+        current_path.setAccessibleName('Dabartinis duomenų failas')
+        location.addWidget(current_path)
+        if not self.state['demo']:
+            row = QHBoxLayout()
+            row.addWidget(button('Perkelti dabartinius duomenis…', self.move_data))
+            row.addWidget(button('Pasirinkti esamą duomenų failą…', self.choose_data))
+            location.addLayout(row)
+        location.addWidget(title('Galite pasirinkti vietinį ar tinklo aplanką, pvz., \\\\SERVERIS\\PrintTrack\\inventory.json. Tinklo vietai reikia skaitymo ir rašymo teisių. Prieš keisdami vietą uždarykite kitus programos langus. Darbas iš kelių kompiuterių vienu metu nėra patikrintas.', True))
         card = self.card('Išvaizda')
         theme = QComboBox()
         theme.addItems(['Šviesi', 'Tamsi'])
@@ -728,17 +714,32 @@ class Window(QMainWindow):
     def open_demo(self):
         from .store import data_dir
         try:
-            if self.licence:
-                self.licence.require_active()
-            demo_store_instance = demo_store(data_dir().parent / 'demo')
-            if self.licence:
-                demo_store_instance.write_check = self.licence.require_active
-            demo = Window(demo_store_instance, licence=self.licence,
-                          licence_notifications=self.licence_notifications)
+            demo = Window(demo_store(data_dir().parent / 'demo'))
             QApplication.instance().demo_windows.append(demo)
             demo.show()
         except (ValidationError, OSError) as e:
             QMessageBox.warning(self, 'DEMO aplinka', str(e))
+
+    def move_data(self):
+        from .storage_location import relocate
+        path, _ = QFileDialog.getSaveFileName(self, 'Nauja duomenų failo vieta',
+            str(self.store.path), 'PrintTrack JSON (*.json)')
+        if not path or not self.confirm('Perkelti dabartinius duomenis į pasirinktą failą ir toliau dirbti ten? Senas failas ir kopijos bus išsaugoti. Esamas paskirties failas nebus perrašytas. Kitus PrintTrack langus uždarykite.'):
+            return
+        def move():
+            self.store = relocate(self.store, path, self.config_path)
+        self.guard(move)
+
+    def choose_data(self):
+        from .storage_location import open_existing
+        path, _ = QFileDialog.getOpenFileName(self, 'Pasirinkti esamą PrintTrack duomenų failą',
+            str(self.store.directory), 'PrintTrack JSON (*.json)')
+        if not path or not self.confirm('Pereiti prie pasirinkto failo? Bus rodomi jo įrašai. Dabartiniai ir pasirinkti duomenys nebus sujungiami, dabartinis failas liks išsaugotas. Kitus PrintTrack langus uždarykite.'):
+            return
+        def choose():
+            self.store.backup()
+            self.store = open_existing(path, self.config_path)
+        self.guard(choose)
 
     def open_data(self):
         from PySide6.QtCore import QUrl

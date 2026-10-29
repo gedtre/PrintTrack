@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 from printtrack.store import Store, ValidationError, data_dir, demo_store
 from printtrack.ui import Window
 from printtrack.initial_data import apply_initial_data, bundled_initial_data
-from printtrack.licensing import Licence
+from printtrack.storage_location import default_config_path, selected_file, open_existing
 
 
 def main():
@@ -28,20 +28,22 @@ def main():
     translator = QTranslator(app)
     translator.load('qt_lt', QLibraryInfo.path(QLibraryInfo.TranslationsPath))
     app.installTranslator(translator)
+    config_path = (args.data_dir / 'settings.json') if args.data_dir else default_config_path()
     directory = args.data_dir or (data_dir().parent / 'demo' if args.demo else data_dir())
-    licence_path = directory / 'license.json' if args.data_dir else data_dir().parent / 'license.json'
-    licence = Licence(licence_path)
+    filename = 'inventory.json'
     try:
+        chosen = None if args.demo or args.data_dir else selected_file(config_path)
+        if chosen:
+            directory, filename = chosen.parent, chosen.name
         initial = None if args.demo else bundled_initial_data()
-        if args.demo and licence.status().active:
+        if args.demo:
             store = demo_store(directory)
+        elif chosen:
+            store = Store(directory, filename=filename, create=False)
         else:
-            store = Store(directory, demo=args.demo, initial_catalogue=initial is None,
-                          write_check=licence.require_active)
-        store.write_check = licence.require_active
-        if not args.demo:
-            if initial and licence.status().active:
-                apply_initial_data(store, initial)
+            store = Store(directory, initial_catalogue=initial is None)
+        if not args.demo and initial and not chosen:
+            apply_initial_data(store, initial)
     except (ValidationError, OSError) as e:
         if args.smoke_test:
             return 2
@@ -49,21 +51,30 @@ def main():
         box.setWindowTitle('PrintTrack · Saugyklos atkūrimas')
         box.setText(str(e))
         restore = box.addButton('Atkurti kopiją…', QMessageBox.AcceptRole)
+        choose = box.addButton('Pasirinkti kitą duomenų failą…', QMessageBox.ActionRole)
         box.addButton('Uždaryti', QMessageBox.RejectRole)
         box.exec()
-        if box.clickedButton() != restore:
+        if box.clickedButton() == choose:
+            path, _ = QFileDialog.getOpenFileName(None, 'Pasirinkti PrintTrack duomenų failą', '', 'JSON (*.json)')
+            if not path:
+                return 1
+            try:
+                store = open_existing(path, config_path, expected_demo=args.demo)
+            except (OSError, ValueError) as error:
+                QMessageBox.critical(None, 'Duomenų vieta', str(error))
+                return 1
+        elif box.clickedButton() != restore:
             return 1
-        path, _ = QFileDialog.getOpenFileName(None, 'Pasirinkti atsarginę kopiją', str(directory / 'backups'), 'JSON (*.json)')
-        if not path:
-            return 1
-        try:
-            licence.require_active()
-            store = Store.recover_backup(directory, path)
-        except (OSError, ValueError) as error:
-            QMessageBox.critical(None, 'Atkūrimas nepavyko', str(error))
-            return 1
-    store.write_check = licence.require_active
-    window = Window(store, licence=licence, licence_notifications=not args.smoke_test)
+        else:
+            path, _ = QFileDialog.getOpenFileName(None, 'Pasirinkti atsarginę kopiją', str(directory / 'backups'), 'JSON (*.json)')
+            if not path:
+                return 1
+            try:
+                store = Store.recover_backup(directory, path, filename=filename)
+            except (OSError, ValueError) as error:
+                QMessageBox.critical(None, 'Atkūrimas nepavyko', str(error))
+                return 1
+    window = Window(store, config_path=None if args.demo else config_path)
     window.show()
     if args.smoke_test:
         def smoke():

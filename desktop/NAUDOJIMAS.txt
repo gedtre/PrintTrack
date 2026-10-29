@@ -11,20 +11,29 @@ konkretiems kabinetams; įrenginių kiekiai ir sandėlio atsargos nespėjami.
 
 Reikalavimai: Windows 10 / 11, 64 bitų. Programa veikia be interneto.
 
-NEMOKAMA LICENCIJA
-Galioja dvejus kalendorinius metus nuo pirmojo šios versijos paleidimo šiame
-kompiuteryje. Galiojimo pabaiga matoma programos viršuje ir Nustatymuose.
-Pavyzdžiui, pirmąkart paleidus 2026-10-29, galiojimas baigiasi 2028-10-29
-tuo pačiu laiku. Atnaujinimas ar inventoriaus kopijos atkūrimas termino nekeičia.
-Pasibaigus terminui rodomas pranešimas:
-„Nemokama licencija baigėsi. Kreipkitės el. paštu: gedtre@gmail.com“.
-Nauji įrašai ir pakeitimai neleidžiami, bet duomenys neištrinami:
-peržiūra, ataskaitos, eksportas ir kopijų išsaugojimas lieka prieinami.
-Licencijos failas: %LOCALAPPDATA%\PrintTrack\license.json.
+GALIOJIMAS
+Programos galiojimo termino ir licencijos tikrinimo nėra. Ankstesnio leidimo
+license.json ignoruojamas, jo šalinti nereikia.
+
+DUOMENŲ FAILO VIETA
+„Nustatymai“ → „Duomenų failo vieta“:
+- „Perkelti dabartinius duomenis…“: pasirinkite naują JSON failo vietą ir
+  pavadinimą. Kopijuojami visi įrašai, istorija, įkeltos nuotraukos ir kopijos.
+  Programa persijungia į naują failą. Senas failas ir jo kopijos paliekami.
+- „Pasirinkti esamą duomenų failą…“: atverkite kitoje vietoje jau esantį
+  PrintTrack JSON failą. Duomenys nesujungiami ir neperrašomi.
+Prieš perkeldami uždarykite kitus PrintTrack langus. Perkėlimui pasirinkite
+naują failą; esamas paskirties failas neperrašomas.
+Galite rinktis ir tinklo kelią, pvz., \\SERVERIS\PrintTrack\inventory.json.
+Reikia skaitymo ir rašymo teisių aplankui bei patikimo tinklo ryšio.
+Pasirinkimas saugomas kiekviename kompiuteryje atskirai:
+%LOCALAPPDATA%\PrintTrack\settings.json.
+Jei pasirinktas failas nepasiekiamas, programa parodo klaidą ir leidžia pasirinkti
+kitą failą. Tuščia pakaitinė duomenų saugykla automatiškai nekuriama.
 
 DARBAS IŠ KELIŲ KOMPIUTERIŲ
-Ši EXE versija skirta vienam kompiuteriui. Nelaikykite jos gyvo inventory.json
-bendrame tinklo arba sinchronizuojamame aplanke kelių naudotojų darbui.
+Galimybė pasirinkti tinklo failą nėra kelių naudotojų darbo garantija. Vienalaikis
+darbas iš kelių kompiuterių per SMB / NAS šioje versijoje nepatikrintas.
 Bendram darbui naudokite atskirai diegiamą PrintTrack serverio versiją su
 PostgreSQL duomenų baze; visi kompiuteriai jungiasi prie serverio per naršyklę.
 Desktop JSON duomenų perkėlimui į serverio versiją reikalingas atskiras importas.
@@ -47,7 +56,8 @@ susijusius suderinamumo ryšius reikia patvirtinti iš naujo.
 Istorijos įrašai netrinami. Klaidas taisykite pagrįstu likučio koregavimu.
 
 DUOMENYS IR KOPIJOS
-Duomenys: %LOCALAPPDATA%\PrintTrack\data\inventory.json
+Numatytoji duomenų vieta: %LOCALAPPDATA%\PrintTrack\data\inventory.json
+Pasirinktą tikrąją vietą matysite „Nustatymai“ → „Duomenų failo vieta“.
 Automatinės kopijos: %LOCALAPPDATA%\PrintTrack\data\backups\
 Nustatymuose galite išsaugoti kopiją į kitą diską arba ją atkurti.
 Įprastas atkūrimas išlaiko visą istoriją, sujungia korteles ir atkuria kopijos

@@ -45,22 +45,21 @@ Compatibility starts empty, and requires evidence entered by a responsible user.
 
 ## Scope and limits
 
-The packaged application has an offline free licence lasting two calendar years
-from its first launch on that Windows account. The start and expiry are stored
-outside inventory backups in `%LOCALAPPDATA%/PrintTrack/license.json`; replacing
-the EXE or restoring an inventory snapshot does not renew it. Custom `--data-dir`
-instances keep a separate `license.json` inside that directory for isolated tests.
-February 29 expires on February 28 two years later. At expiry a popup gives
-`gedtre@gmail.com`; all mutations are refused at the store boundary, including
-CSV import and inventory restore. Viewing, reports, exports and backup creation
-remain available. An open app checks expiry every five seconds and at each write.
-This is a local licence check, not a signed or server-managed activation system;
-it does not prevent deliberate clock or licence-file manipulation.
-
-Do not share the desktop JSON file for concurrent LAN clients. The repository's
-web/server variant uses PostgreSQL and is the appropriate architecture for shared
-inventory. Desktop-to-server data migration requires a separate importer; it is
-not automatic.
+The application has no expiry or licence enforcement. Old `license.json` files
+are ignored. In Settings, users can copy their complete current inventory and
+backup history to a new JSON location, or select an existing inventory without
+merging. The selected absolute path is stored per workstation in
+`%LOCALAPPDATA%/PrintTrack/settings.json`. Existing destinations are never
+replaced by relocation, and the original inventory and backups remain intact.
+If the selected file is missing or offline, startup fails visibly and offers file
+selection instead of silently creating a new local database. Network/UNC paths
+are stored as paths, not copied into a local cache. An explicit `--data-dir`
+argument overrides the saved path. An explicitly selected existing inventory
+does not receive automatic catalogue merging on restart. Network/UNC paths
+are accepted with normal operating-system filesystem permissions. Actual SMB/NAS
+concurrent use and interrupted-network durability have not been validated.
+The web/PostgreSQL variant remains the supported architecture for multiple
+simultaneous clients; desktop-to-server migration requires a separate importer.
 
 Single workstation, local filesystem. JSON is not encrypted or cryptographically
 signed. Windows account/filesystem permissions govern access. History is protected

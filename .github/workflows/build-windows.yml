@@ -67,21 +67,29 @@ jobs:
           if ($second.ExitCode -ne 0) { throw "EXE relaunch failed: $($second.ExitCode)" }
           $reloaded = Get-Content "$data/inventory.json" -Raw | ConvertFrom-Json
           if ($reloaded.rooms.Count -ne $saved.rooms.Count -or $reloaded.printers.Count -ne $saved.printers.Count) { throw 'Relaunch duplicated initial records' }
-          # Exercise the packaged app after licence expiry without changing inventory.
-          $issued = [DateTimeOffset]::UtcNow.AddYears(-3)
-          $licencePath = Join-Path $data 'license.json'
-          @{
-            version = 1
-            issued_at = $issued.ToString('yyyy-MM-ddTHH:mm:sszzz')
-            expires_at = $issued.AddYears(2).ToString('yyyy-MM-ddTHH:mm:sszzz')
-          } | ConvertTo-Json | Set-Content -Encoding utf8 $licencePath
-          $expiredLicence = Get-Content $licencePath -Raw
-          $expired = Start-Process -FilePath $exe -ArgumentList @('--smoke-test', '--data-dir', $data) -PassThru
-          if (!$expired.WaitForExit(90000)) { $expired.Kill(); throw 'Expired licence startup timed out' }
-          if ($expired.ExitCode -ne 0) { throw 'Expired licence prevents inventory viewing' }
-          if ((Get-Content $licencePath -Raw) -ne $expiredLicence) { throw 'Expired licence was silently renewed' }
-          $afterExpiry = Get-Content "$data/inventory.json" -Raw | ConvertFrom-Json
-          if ($afterExpiry.revision -ne $reloaded.revision) { throw 'Expired startup modified inventory' }
+          if (Test-Path "$data/license.json") { throw 'Removed licence system still creates a licence' }
+          # Verify saved custom-file selection in the actual packaged application.
+          $alternate = Join-Path $env:RUNNER_TEMP 'printtrack-relocated.json'
+          Copy-Item "$data/inventory.json" $alternate
+          $previousLocalAppData = $env:LOCALAPPDATA
+          try {
+            $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP 'printtrack-profile'
+            $configDir = Join-Path $env:LOCALAPPDATA 'PrintTrack'
+            New-Item -ItemType Directory -Force $configDir | Out-Null
+            @{ inventory_file = $alternate } | ConvertTo-Json | Set-Content -Encoding utf8 "$configDir/settings.json"
+            '{"version":1,"issued_at":"2020-01-01T00:00:00+00:00","expires_at":"2022-01-01T00:00:00+00:00"}' | Set-Content -Encoding utf8 "$configDir/license.json"
+            $selected = Start-Process -FilePath $exe -ArgumentList @('--smoke-test') -PassThru
+            if (!$selected.WaitForExit(90000)) { $selected.Kill(); throw 'Selected-file startup timed out' }
+            if ($selected.ExitCode -ne 0) { throw 'Selected-file startup failed' }
+            if (Test-Path "$configDir/data/inventory.json") { throw 'Saved selection was ignored' }
+            Remove-Item $alternate
+            $missing = Start-Process -FilePath $exe -ArgumentList @('--smoke-test') -PassThru
+            if (!$missing.WaitForExit(90000)) { $missing.Kill(); throw 'Offline-file startup timed out' }
+            if ($missing.ExitCode -ne 2) { throw 'Missing selected file was not reported' }
+            if (Test-Path "$configDir/data/inventory.json") { throw 'Offline selection silently created local data' }
+          } finally {
+            $env:LOCALAPPDATA = $previousLocalAppData
+          }
       - name: Package end-user download
         shell: pwsh
         run: |

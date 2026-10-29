@@ -134,18 +134,30 @@ def validate(state):
     integer(state.get('revision'), 'Duomenų versija', 0)
 
 
+def validate_filename(filename):
+    if (Path(filename).name != filename or not filename.lower().endswith('.json')
+            or filename.lower() in ['pending.json', 'settings.json', 'license.json']
+            or filename.lower().endswith('.pending.json')):
+        raise ValidationError('Netinkamas arba rezervuotas duomenų failo pavadinimas.')
+
+
 class Store:
-    def __init__(self, directory=None, demo=False, initial_catalogue=True, write_check=None):
-        self.write_check = write_check
+    def __init__(self, directory=None, demo=False, initial_catalogue=True, filename='inventory.json', create=True):
         self.directory = Path(directory or data_dir())
-        self.directory.mkdir(parents=True, exist_ok=True)
-        self.path = self.directory / 'inventory.json'
-        self.journal = self.directory / 'pending.json'
-        self.backups = self.directory / 'backups'
+        validate_filename(filename)
+        self.path = self.directory / filename
+        if not create and not self.path.is_file():
+            raise ValidationError('Pasirinktas duomenų failas nepasiekiamas. Patikrinkite kelią ir tinklo ryšį. Tuščia saugykla nebus kuriama.')
+        if create:
+            self.directory.mkdir(parents=True, exist_ok=True)
+        self.journal = self.directory / ('pending.json' if filename == 'inventory.json' else filename + '.pending.json')
+        self.backups = self.directory / ('backups' if filename == 'inventory.json' else filename + '.backups')
         self.backups.mkdir(exist_ok=True)
         with self.lock():
             self._recover()
             if not self.path.exists():
+                if not create:
+                    raise ValidationError('Duomenų failas nepasiekiamas.')
                 self._atomic(self.path, empty_state(demo, initial_catalogue))
             self._read()
             self._backup('startup')
@@ -208,8 +220,6 @@ class Store:
 
     def mutate(self, operation, label):
         with self.lock():
-            if self.write_check:
-                self.write_check()
             self._recover()
             state = self._read()
             result = operation(state)
@@ -320,20 +330,21 @@ class Store:
         self.mutate(operation, 'Atkurta atsarginė kopija: ' + Path(path).name)
 
     @classmethod
-    def recover_backup(cls, directory, backup):
+    def recover_backup(cls, directory, backup, filename='inventory.json'):
         """Emergency recovery preserves unreadable originals for specialist recovery."""
+        validate_filename(filename)
         state = json.loads(Path(backup).read_text('utf-8'))
         validate(state)
         directory = Path(directory)
         with portalocker.Lock(str(directory / '.lock'), timeout=5):
             suffix = '.damaged-' + uid()
-            for name in ['inventory.json', 'pending.json']:
+            for name in [filename, 'pending.json' if filename == 'inventory.json' else filename + '.pending.json']:
                 path = directory / name
                 if path.exists():
                     path.rename(directory / (name + suffix))
             instance = object.__new__(cls)
-            instance._atomic(directory / 'inventory.json', state)
-        return cls(directory)
+            instance._atomic(directory / filename, state)
+        return cls(directory, filename=filename)
 
     def set_theme(self, theme):
         self.mutate(lambda s: s['preferences'].update(theme=theme), 'Pakeista tema')
